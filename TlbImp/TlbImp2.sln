@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TlbImp2", "TlbImp2.csproj", "{746AE6CF-799B-48C8-ABFD-BBD15ABA7BDD}"
+EndProject
+Global
+	GlobalSection(TeamFoundationVersionControl) = preSolution
+		SccNumberOfProjects = 2
+		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccTeamFoundationServer = https://tfs07.codeplex.com/
+		SccLocalPath0 = .
+		SccProjectUniqueName1 = TlbImp2.csproj
+		SccLocalPath1 = .
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{746AE6CF-799B-48C8-ABFD-BBD15ABA7BDD}.Debug|x64.ActiveCfg = Debug|x64
+		{746AE6CF-799B-48C8-ABFD-BBD15ABA7BDD}.Debug|x64.Build.0 = Debug|x64
+		{746AE6CF-799B-48C8-ABFD-BBD15ABA7BDD}.Debug|x86.ActiveCfg = Debug|x86
+		{746AE6CF-799B-48C8-ABFD-BBD15ABA7BDD}.Debug|x86.Build.0 = Debug|x86
+		{746AE6CF-799B-48C8-ABFD-BBD15ABA7BDD}.Release|x64.ActiveCfg = Release|x64
+		{746AE6CF-799B-48C8-ABFD-BBD15ABA7BDD}.Release|x64.Build.0 = Release|x64
+		{746AE6CF-799B-48C8-ABFD-BBD15ABA7BDD}.Release|x86.ActiveCfg = Release|x86
+		{746AE6CF-799B-48C8-ABFD-BBD15ABA7BDD}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
