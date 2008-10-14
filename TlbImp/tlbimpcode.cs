@@ -215,7 +215,8 @@ internal class TlbImpCode
                 // Import the typelib to an assembly.
                 AssemblyBuilder AsmBldr = DoImport(TypeLib, s_Options.m_strAssemblyName, s_Options.m_strAssemblyNamespace,
                     s_Options.m_AssemblyVersion, s_Options.m_aPublicKey, s_Options.m_sKeyPair, s_Options.m_strProduct,
-                    s_Options.m_strProductVersion, s_Options.m_strCompany, s_Options.m_strCopyright, s_Options.m_strTrademark, s_Options.m_flags);
+                    s_Options.m_strProductVersion, s_Options.m_strCompany, s_Options.m_strCopyright, s_Options.m_strTrademark,
+                    s_Options.m_flags, s_Options.m_isVersion2, s_Options.m_isPreserveSig);
                 if (AsmBldr == null)
                     return ErrorReturnCode;
             }
@@ -588,7 +589,9 @@ internal class TlbImpCode
                                            String strCompany,
                                            String strCopyright,
                                            String strTrademark,
-                                           TypeLibImporterFlags flags)
+                                           TypeLibImporterFlags flags,
+                                           bool isVersion2,
+                                           bool isPreserveSig)
     {
         // Detemine the assembly file name.
         String asmFileName = Path.GetFileName(strAssemblyFileName);
@@ -618,7 +621,9 @@ internal class TlbImpCode
             publicKey,
             keyPair,
             strAssemblyNamespace,
-            asmVersion);
+            asmVersion,
+            isVersion2,
+            isPreserveSig);
 
         if (AsmBldr == null) return null;
 
@@ -1049,7 +1054,9 @@ internal class ImporterCallback : ITypeLibImporterNotifySink
                                     TlbImpCode.s_Options.m_strCompany,
                                     TlbImpCode.s_Options.m_strCopyright,
                                     TlbImpCode.s_Options.m_strTrademark,
-                                    TlbImpCode.s_Options.m_flags);
+                                    TlbImpCode.s_Options.m_flags,
+                                    TlbImpCode.s_Options.m_isVersion2,
+                                    TlbImpCode.s_Options.m_isPreserveSig);
             
             // The import could fail. In this case, 
             if (rslt == null) return null;

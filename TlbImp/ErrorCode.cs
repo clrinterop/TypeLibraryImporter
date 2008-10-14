@@ -120,6 +120,7 @@ namespace tlbimp2
         Msg_TypeLibRefResolved = 4013,
         Msg_TypeLibRefResolvedInRegistry = 4014,
         Msg_TypeLibRefMismatch = 4015,
-        Msg_TypeLibRefResolveFailed = 4016
+        Msg_TypeLibRefResolveFailed = 4016,
+        Msg_PropertyIsOmitted = 4017
     }
 }

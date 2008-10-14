@@ -100,9 +100,11 @@ namespace tlbimp2
 
     struct ConverterSettings
     {
-        public bool m_bGenerateClassInterfaces;
-        public string m_strNamespace;
+        public bool m_isGenerateClassInterfaces;
+        public string m_namespace;
         public TypeLibImporterFlags m_flags;
+        public bool m_isVersion2;
+        public bool m_isPreserveSig;
     }
 
     // The class that is the heart of the ITypeInfo to managed type conversion process.
@@ -401,7 +403,7 @@ namespace tlbimp2
                     return tlbNamespace;
 
                 if (attr.guid == m_libid)
-                    tlbNamespace = m_settings.m_strNamespace;
+                    tlbNamespace = m_settings.m_namespace;
                 else
                 {
                     tlbNamespace = typeLib.GetDocumentation();
@@ -777,7 +779,7 @@ namespace tlbimp2
             return memberTable.HasDuplicateMember(name, paramType, memberType);
         }
 
-        public bool GenerateClassInterfaces { get { return m_settings.m_bGenerateClassInterfaces; } }
+        public bool GenerateClassInterfaces { get { return m_settings.m_isGenerateClassInterfaces; } }
 
         /// <summary>
         /// Register the type so that later it could be looked-up to find the corresonding IConvBase

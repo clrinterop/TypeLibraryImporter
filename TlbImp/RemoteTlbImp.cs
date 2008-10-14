@@ -38,7 +38,9 @@ public class RemoteTlbImp : MarshalByRefObject
                    String               strProductVersion,
                    String               strCompany,
                    String               strCopyright,
-                   String               strTrademark)
+                   String               strTrademark,
+                   bool                 isVersion2,
+                   bool                 isPreserveSig)
     {
 
         TlbImpOptions options = new TlbImpOptions();
@@ -64,6 +66,8 @@ public class RemoteTlbImp : MarshalByRefObject
         options.m_strCompany = strCompany;
         options.m_strCopyright = strCopyright;
         options.m_strTrademark = strTrademark;
+        options.m_isVersion2 = isVersion2;
+        options.m_isPreserveSig = isPreserveSig;
         
         return TlbImpCode.Run(options);
     }

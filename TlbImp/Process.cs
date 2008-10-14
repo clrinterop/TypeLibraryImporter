@@ -375,7 +375,9 @@ namespace tlbimp2
             byte[] publicKey,
             StrongNameKeyPair keyPair,
             string asmNamespace,
-            Version asmVersion)
+            Version asmVersion,
+            bool isVersion2,
+            bool isPreserveSig)
         {
             m_resolver = notifySink;
 
@@ -455,9 +457,11 @@ namespace tlbimp2
             currentDomain.ReflectionOnlyAssemblyResolve += asmResolveHandler;
 
             ConverterSettings settings;
-            settings.m_bGenerateClassInterfaces = true;
-            settings.m_strNamespace = asmNamespace;
+            settings.m_isGenerateClassInterfaces = true;
+            settings.m_namespace = asmNamespace;
             settings.m_flags = flags;
+            settings.m_isVersion2 = isVersion2;
+            settings.m_isPreserveSig = isPreserveSig;
 
             m_converterInfo = new ConverterInfo(m_moduleBuilder, tlb, m_resolver, settings);
 

@@ -443,8 +443,26 @@ namespace tlbimp2
 
             TypeDesc retTypeDesc = func.elemdescFunc.tdesc;
 
+            // If /preservesig is specified, we perform the PreserveSig transformation, except for dispatch functions.
+            // Because they are not affected by PreserveSig attribute.
+            if (info.ConverterInfo.Settings.m_isPreserveSig && (!func.IsDispatch))
+            {
+                if (retTypeDesc.vt == (int)VarEnum.VT_VOID)
+                {
+                    retType = s_voidTypeConverter;
+                    kind = ReturnKind.NoReturn;
+                }
+                else
+                {
+                    retType = new TypeConverter(info.ConverterInfo, info.RefTypeInfo, func.elemdescFunc.tdesc, isNewEnumMember, ConversionType.ReturnValue);
+                    kind = ReturnKind.ReturnValue;
+                }
+
+                return retType;
+            }
+
             // Inspect the return value
-            // If the return is HRESULT, we will do the HRESULT transformation
+            // If the return is HRESULT and PreserveSig switch is not specified, we will do the HRESULT transformation
             // Otherwise, stick to the original return value and use PreserveSigAttribute
             if (retTypeDesc.vt == (int)VarEnum.VT_HRESULT)
             {

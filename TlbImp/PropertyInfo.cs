@@ -18,6 +18,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 using System.Runtime.CompilerServices;
 using System.Diagnostics;
+using TlbImpCode;
 
 namespace tlbimp2
 {
@@ -73,6 +74,23 @@ namespace tlbimp2
             }
             else
             {
+                // If /preservesig is specified, do not generate property, and only
+                // the getter and setter functions are enough.
+                // Property requires that the property getter must return the real property value, and the first parameter of
+                // the setter must be the property value. While, the /preservesig switch will change the prototype of the setters and
+                // getters, which is different from what the compiler expected.
+                // So we do not support the Property if the /preservesig is specified.
+                if (info.ConverterInfo.Settings.m_isPreserveSig &&
+                    (m_propertyInfo.BestFuncDesc != null && !m_propertyInfo.BestFuncDesc.IsDispatch))
+                {
+                    if (TlbImpCode.TlbImpCode.s_Options.m_bVerboseMode)
+                        FormattedOutput.Output.WriteInfo(Resource.FormatString("Msg_PropertyIsOmitted",
+                                                                               m_propertyInfo.RecommendedName,
+                                                                               m_propertyInfo.RefTypeInfo.GetDocumentation()),
+                                                         MessageCode.Msg_PropertyIsOmitted);
+                    return;
+                }
+
                 // Converting propget/propput/propputref functions to property.
                 TypeConverter typeConverter = m_propertyInfo.GetPropertyTypeConverter(info.ConverterInfo, info.RefTypeInfo);
                 retType = typeConverter.ConvertedType;

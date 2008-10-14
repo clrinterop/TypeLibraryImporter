@@ -248,7 +248,9 @@ internal class TlbImp
                                s_Options.m_strProductVersion,
                                s_Options.m_strCompany,
                                s_Options.m_strCopyright,
-                               s_Options.m_strTrademark);
+                               s_Options.m_strTrademark,
+                               s_Options.m_isVersion2,
+                               s_Options.m_isPreserveSig);
 
         // Unload the app domain now that we've finished the import.
         AppDomain.Unload(domain);
@@ -286,7 +288,7 @@ internal class TlbImp
                                                         "unsafe", "nologo", "silent", "verbose", "+strictref", "primary", "*namespace", 
                                                         "*asmversion", "sysarray", "*transform", "?", "help", "*tlbreference",
                                                         "noclassmembers", "*machine", "*silence", "*product", "*productversion", 
-                                                        "*company", "*copyright", "*trademark" });
+                                                        "*company", "*copyright", "*trademark", "v2", "preservesig" });
 
         // Make sure there is at least one argument.
         if ((cmdLine.NumArgs + cmdLine.NumOpts) < 1)
@@ -536,6 +538,14 @@ internal class TlbImp
                 PrintUsage();
                 ReturnCode = SuccessReturnCode;
                 return false;
+            }
+            else if (opt.Name.Equals("v2"))
+            {
+                Options.m_isVersion2 = true;
+            }
+            else if (opt.Name.Equals("preservesig"))
+            {
+                Options.m_isPreserveSig = true;
             }
         }
 

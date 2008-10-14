@@ -388,67 +388,100 @@ Options:</value>
     <value>                             ignore PIAs</value>
   </data>
   <data name="Msg_Usage_35" xml:space="preserve">
-    <value>    /? or /help              Display this usage message</value>
+    <value>    /v2                      Enable new behaviors in TlbImp v2. Please note</value>
   </data>
   <data name="Msg_Usage_36" xml:space="preserve">
-    <value />
+    <value>                             that using this switch may break your existing</value>
   </data>
   <data name="Msg_Usage_37" xml:space="preserve">
-    <value>The assembly version must be specified as: Major.Minor.Build.Revision.</value>
+    <value>                             application.</value>
   </data>
   <data name="Msg_Usage_38" xml:space="preserve">
-    <value />
+    <value>    /preservesig             Stop applying the [out, retval] parameter</value>
   </data>
   <data name="Msg_Usage_39" xml:space="preserve">
-    <value>Multiple reference assemblies can be specified by using the /reference option</value>
+    <value>                             transformation, and add PreserveSigAttribute to</value>
   </data>
   <data name="Msg_Usage_40" xml:space="preserve">
-    <value>multiple times.</value>
+    <value>                             methods in interfaces, except for disp-only</value>
   </data>
   <data name="Msg_Usage_41" xml:space="preserve">
-    <value />
+    <value>                             interfaces. The properties from non-dispatch</value>
   </data>
   <data name="Msg_Usage_42" xml:space="preserve">
-    <value>Supported machine types:</value>
+    <value>                             interfaces will be omitted.</value>
   </data>
   <data name="Msg_Usage_43" xml:space="preserve">
-    <value>    X86</value>
+    <value>    /? or /help              Display this usage message</value>
   </data>
   <data name="Msg_Usage_44" xml:space="preserve">
-    <value>    X64</value>
+    <value />
   </data>
   <data name="Msg_Usage_45" xml:space="preserve">
-    <value>    Itanium</value>
+    <value>The assembly version must be specified as: Major.Minor.Build.Revision.</value>
   </data>
   <data name="Msg_Usage_46" xml:space="preserve">
-    <value>    Agnostic</value>
+    <value />
   </data>
   <data name="Msg_Usage_47" xml:space="preserve">
-    <value />
+    <value>Multiple reference assemblies can be specified by using the /reference option</value>
   </data>
   <data name="Msg_Usage_48" xml:space="preserve">
-    <value>Supported transforms:</value>
+    <value>multiple times.</value>
   </data>
   <data name="Msg_Usage_49" xml:space="preserve">
-    <value>    SerializableValueClasses Mark all value classes as serializable</value>
-  </data>
-  <data name="Msg_Usage_50" xml:space="preserve">
-    <value>    DispRet                  Apply the [out, retval] parameter transformation</value>
-  </data>
-  <data name="Msg_Usage_51" xml:space="preserve">
-    <value>                             to methods of disp only interfaces</value>
-  </data>
-  <data name="Msg_Usage_52" xml:space="preserve">
     <value />
   </data>
+  <data name="Msg_Usage_50" xml:space="preserve">
+    <value>Supported machine types:</value>
+  </data>
+  <data name="Msg_Usage_51" xml:space="preserve">
+    <value>    X86</value>
+  </data>
+  <data name="Msg_Usage_52" xml:space="preserve">
+    <value>    X64</value>
+  </data>
   <data name="Msg_Usage_53" xml:space="preserve">
-    <value>A resource ID can optionally be appended to the TypeLibName when importing a</value>
+    <value>    Itanium</value>
   </data>
   <data name="Msg_Usage_54" xml:space="preserve">
-    <value>type library from a module containing multiple type libraries.</value>
+    <value>    Agnostic</value>
   </data>
   <data name="Msg_Usage_55" xml:space="preserve">
+    <value />
+  </data>
+  <data name="Msg_Usage_56" xml:space="preserve">
+    <value>Supported transforms:</value>
+  </data>
+  <data name="Msg_Usage_57" xml:space="preserve">
+    <value>    SerializableValueClasses Mark all value classes as serializable</value>
+  </data>
+  <data name="Msg_Usage_58" xml:space="preserve">
+    <value>    DispRet                  Apply the [out, retval] parameter transformation</value>
+  </data>
+  <data name="Msg_Usage_59" xml:space="preserve">
+    <value>                             to methods of disp-only interfaces</value>
+  </data>
+  <data name="Msg_Usage_60" xml:space="preserve">
+    <value />
+  </data>
+  <data name="Msg_Usage_61" xml:space="preserve">
+    <value>A resource ID can optionally be appended to the TypeLibName when importing a</value>
+  </data>
+  <data name="Msg_Usage_62" xml:space="preserve">
+    <value>type library from a module containing multiple type libraries.</value>
+  </data>
+  <data name="Msg_Usage_63" xml:space="preserve">
     <value> example: TlbImp MyModule.dll\1</value>
+  </data>
+  <data name="Msg_Usage_64" xml:space="preserve">
+    <value />
+  </data>
+  <data name="Msg_Usage_65" xml:space="preserve">
+    <value>New behaviors in TlbImp version 2 include:</value>
+  </data>
+  <data name="Msg_Usage_66" xml:space="preserve">
+    <value>    Convert VARIANT_BOOL in structures to bool.</value>
   </data>
   <data name="Wrn_AmbiguousReturn" xml:space="preserve">
     <value>Type library importer has encountered a method with an unexpected [out, retval] parameter: '{0}.{1}'.</value>
@@ -548,5 +581,8 @@ Options:</value>
   </data>
   <data name="Msg_TypeLibRefResolveFailed" xml:space="preserve">
     <value>Cannot resolve type library '{0}, {1}, {{{2}}}'.</value>
+  </data>
+  <data name="Msg_PropertyIsOmitted" xml:space="preserve">
+    <value>Property '{0}' of type '{1}' is omitted.</value>
   </data>
 </root>
