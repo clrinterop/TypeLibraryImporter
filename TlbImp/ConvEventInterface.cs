@@ -216,7 +216,7 @@ namespace tlbimp2
                     // Create methods for the delegate
                     InterfaceInfo interfaceInfoForDelegate = new InterfaceInfo(m_info, delegateTypeBuilder, false, type, attr, false, true);
                     interfaceInfoForDelegate.AllowNewEnum = !m_convInterface.ImplementsIEnumerable;
-                    ConvCommon.CreateMethodForDelegate(interfaceInfoForDelegate, func);
+                    ConvCommon.CreateMethodForDelegate(interfaceInfoForDelegate, func, index);
 
                     // Emit ComVisibleAttribute(false)
                     delegateTypeBuilder.SetCustomAttribute(CustomAttributeHelper.GetBuilderForComVisible(false));

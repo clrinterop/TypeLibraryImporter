@@ -1056,9 +1056,9 @@ namespace tlbimp2
             CreateMethod(info, memberInfo, CreateMethodMode.InterfaceMethodMode);
         }
 
-        static public void CreateMethodForDelegate(InterfaceInfo info, FuncDesc funcDesc)
+        static public void CreateMethodForDelegate(InterfaceInfo info, FuncDesc funcDesc, int index)
         {
-            InterfaceMemberInfo memberInfo = new InterfaceMemberInfo(info.ConverterInfo, info.RefTypeInfo, -1, INVOKE_METHOD, INVOKE_METHOD, InterfaceMemberType.Method, INVOKEKIND.INVOKE_FUNC, funcDesc.memid, funcDesc, null);
+            InterfaceMemberInfo memberInfo = new InterfaceMemberInfo(info.ConverterInfo, info.RefTypeInfo, index, INVOKE_METHOD, INVOKE_METHOD, InterfaceMemberType.Method, INVOKEKIND.INVOKE_FUNC, funcDesc.memid, funcDesc, null);
             CreateMethod(info, memberInfo, CreateMethodMode.EventDelegateMode);
         }
 
