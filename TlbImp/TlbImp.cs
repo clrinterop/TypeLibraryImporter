@@ -250,7 +250,8 @@ internal class TlbImp
                                s_Options.m_strCopyright,
                                s_Options.m_strTrademark,
                                s_Options.m_isVersion2,
-                               s_Options.m_isPreserveSig);
+                               s_Options.m_isPreserveSig,
+                               s_Options.m_isRemoveEnumPrefix);
 
         // Unload the app domain now that we've finished the import.
         AppDomain.Unload(domain);
@@ -288,7 +289,7 @@ internal class TlbImp
                                                         "unsafe", "nologo", "silent", "verbose", "+strictref", "primary", "*namespace", 
                                                         "*asmversion", "sysarray", "*transform", "?", "help", "*tlbreference",
                                                         "noclassmembers", "*machine", "*silence", "*product", "*productversion", 
-                                                        "*company", "*copyright", "*trademark", "v2", "preservesig" });
+                                                        "*company", "*copyright", "*trademark", "v2", "preservesig", "removeenumprefix" });
 
         // Make sure there is at least one argument.
         if ((cmdLine.NumArgs + cmdLine.NumOpts) < 1)
@@ -546,6 +547,10 @@ internal class TlbImp
             else if (opt.Name.Equals("preservesig"))
             {
                 Options.m_isPreserveSig = true;
+            }
+            else if (opt.Name.Equals("removeenumprefix"))
+            {
+                Options.m_isRemoveEnumPrefix = true;
             }
         }
 

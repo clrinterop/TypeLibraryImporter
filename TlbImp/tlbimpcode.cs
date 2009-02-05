@@ -216,7 +216,7 @@ internal class TlbImpCode
                 AssemblyBuilder AsmBldr = DoImport(TypeLib, s_Options.m_strAssemblyName, s_Options.m_strAssemblyNamespace,
                     s_Options.m_AssemblyVersion, s_Options.m_aPublicKey, s_Options.m_sKeyPair, s_Options.m_strProduct,
                     s_Options.m_strProductVersion, s_Options.m_strCompany, s_Options.m_strCopyright, s_Options.m_strTrademark,
-                    s_Options.m_flags, s_Options.m_isVersion2, s_Options.m_isPreserveSig);
+                    s_Options.m_flags, s_Options.m_isVersion2, s_Options.m_isPreserveSig, s_Options.m_isRemoveEnumPrefix);
                 if (AsmBldr == null)
                     return ErrorReturnCode;
             }
@@ -591,7 +591,8 @@ internal class TlbImpCode
                                            String strTrademark,
                                            TypeLibImporterFlags flags,
                                            bool isVersion2,
-                                           bool isPreserveSig)
+                                           bool isPreserveSig,
+                                           bool isRemoveEnumPrefix)
     {
         // Detemine the assembly file name.
         String asmFileName = Path.GetFileName(strAssemblyFileName);
@@ -623,7 +624,8 @@ internal class TlbImpCode
             strAssemblyNamespace,
             asmVersion,
             isVersion2,
-            isPreserveSig);
+            isPreserveSig,
+            isRemoveEnumPrefix);
 
         if (AsmBldr == null) return null;
 
@@ -1056,7 +1058,8 @@ internal class ImporterCallback : ITypeLibImporterNotifySink
                                     TlbImpCode.s_Options.m_strTrademark,
                                     TlbImpCode.s_Options.m_flags,
                                     TlbImpCode.s_Options.m_isVersion2,
-                                    TlbImpCode.s_Options.m_isPreserveSig);
+                                    TlbImpCode.s_Options.m_isPreserveSig,
+                                    TlbImpCode.s_Options.m_isRemoveEnumPrefix);
             
             // The import could fail. In this case, 
             if (rslt == null) return null;

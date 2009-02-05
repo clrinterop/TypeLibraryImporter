@@ -42,6 +42,7 @@ public sealed class TlbImpOptions
     public String               m_strTrademark = null;
     public bool                 m_isVersion2 = false;
     public bool                 m_isPreserveSig = false;
+    public bool                 m_isRemoveEnumPrefix = false;
 }
 
 }

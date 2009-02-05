@@ -105,6 +105,7 @@ namespace tlbimp2
         public TypeLibImporterFlags m_flags;
         public bool m_isVersion2;
         public bool m_isPreserveSig;
+        public bool m_isRemoveEnumPrefix;
     }
 
     // The class that is the heart of the ITypeInfo to managed type conversion process.

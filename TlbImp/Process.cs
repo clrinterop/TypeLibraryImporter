@@ -377,7 +377,8 @@ namespace tlbimp2
             string asmNamespace,
             Version asmVersion,
             bool isVersion2,
-            bool isPreserveSig)
+            bool isPreserveSig,
+            bool isRemoveEnumPrefix)
         {
             m_resolver = notifySink;
 
@@ -462,6 +463,7 @@ namespace tlbimp2
             settings.m_flags = flags;
             settings.m_isVersion2 = isVersion2;
             settings.m_isPreserveSig = isPreserveSig;
+            settings.m_isRemoveEnumPrefix = isRemoveEnumPrefix;
 
             m_converterInfo = new ConverterInfo(m_moduleBuilder, tlb, m_resolver, settings);
 

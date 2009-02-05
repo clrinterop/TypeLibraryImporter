@@ -1644,6 +1644,29 @@ namespace tlbimp2
         /// </summary>
         public static void CreateConstantFields(ConverterInfo info, TypeInfo type, TypeBuilder typeBuilder, ConvType convType)
         {
+            string typeName = typeBuilder.Name;
+            bool removeEnumPrefix = false;
+            if (convType == ConvType.Enum && info.Settings.m_isRemoveEnumPrefix)
+            {
+                removeEnumPrefix = true;
+                using (TypeAttr attr = type.GetTypeAttr())
+                {
+                    int cVars = attr.cVars;
+                    for (int n = 0; n < cVars; ++n)
+                    {
+                        using (VarDesc var = type.GetVarDesc(n))
+                        {
+                            string fieldName = type.GetDocumentation(var.memid);
+                            if (!fieldName.StartsWith(typeName + "_"))
+                            {
+                                removeEnumPrefix = false;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
             using (TypeAttr attr = type.GetTypeAttr())
             {
                 int cVars = attr.cVars;
@@ -1652,6 +1675,9 @@ namespace tlbimp2
                     using (VarDesc var = type.GetVarDesc(n))
                     {
                         string fieldName = type.GetDocumentation(var.memid);
+
+                        if (removeEnumPrefix)
+                            fieldName = fieldName.Substring(typeName.Length + 1);
 
                         // We don't want the same conversion rules as Field for VT_BOOL and VT_ARRAY, so use Element instead
                         // Basically Element is the same as Field except that it doesn't have special rules for VT_BOOL/VT_ARRAY

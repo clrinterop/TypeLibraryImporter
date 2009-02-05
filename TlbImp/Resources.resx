@@ -411,76 +411,76 @@ Options:</value>
   <data name="Msg_Usage_42" xml:space="preserve">
     <value>                             interfaces will be omitted.</value>
   </data>
-  <data name="Msg_Usage_43" xml:space="preserve">
-    <value>    /? or /help              Display this usage message</value>
-  </data>
-  <data name="Msg_Usage_44" xml:space="preserve">
-    <value />
-  </data>
   <data name="Msg_Usage_45" xml:space="preserve">
-    <value>The assembly version must be specified as: Major.Minor.Build.Revision.</value>
+    <value>    /? or /help              Display this usage message</value>
   </data>
   <data name="Msg_Usage_46" xml:space="preserve">
     <value />
   </data>
   <data name="Msg_Usage_47" xml:space="preserve">
-    <value>Multiple reference assemblies can be specified by using the /reference option</value>
+    <value>The assembly version must be specified as: Major.Minor.Build.Revision.</value>
   </data>
   <data name="Msg_Usage_48" xml:space="preserve">
-    <value>multiple times.</value>
+    <value />
   </data>
   <data name="Msg_Usage_49" xml:space="preserve">
-    <value />
+    <value>Multiple reference assemblies can be specified by using the /reference option</value>
   </data>
   <data name="Msg_Usage_50" xml:space="preserve">
-    <value>Supported machine types:</value>
+    <value>multiple times.</value>
   </data>
   <data name="Msg_Usage_51" xml:space="preserve">
-    <value>    X86</value>
+    <value />
   </data>
   <data name="Msg_Usage_52" xml:space="preserve">
-    <value>    X64</value>
+    <value>Supported machine types:</value>
   </data>
   <data name="Msg_Usage_53" xml:space="preserve">
-    <value>    Itanium</value>
+    <value>    X86</value>
   </data>
   <data name="Msg_Usage_54" xml:space="preserve">
-    <value>    Agnostic</value>
+    <value>    X64</value>
   </data>
   <data name="Msg_Usage_55" xml:space="preserve">
-    <value />
+    <value>    Itanium</value>
   </data>
   <data name="Msg_Usage_56" xml:space="preserve">
-    <value>Supported transforms:</value>
+    <value>    Agnostic</value>
   </data>
   <data name="Msg_Usage_57" xml:space="preserve">
-    <value>    SerializableValueClasses Mark all value classes as serializable</value>
+    <value />
   </data>
   <data name="Msg_Usage_58" xml:space="preserve">
-    <value>    DispRet                  Apply the [out, retval] parameter transformation</value>
+    <value>Supported transforms:</value>
   </data>
   <data name="Msg_Usage_59" xml:space="preserve">
-    <value>                             to methods of disp-only interfaces</value>
+    <value>    SerializableValueClasses Mark all value classes as serializable</value>
   </data>
   <data name="Msg_Usage_60" xml:space="preserve">
-    <value />
+    <value>    DispRet                  Apply the [out, retval] parameter transformation</value>
   </data>
   <data name="Msg_Usage_61" xml:space="preserve">
-    <value>A resource ID can optionally be appended to the TypeLibName when importing a</value>
+    <value>                             to methods of disp-only interfaces</value>
   </data>
   <data name="Msg_Usage_62" xml:space="preserve">
-    <value>type library from a module containing multiple type libraries.</value>
-  </data>
-  <data name="Msg_Usage_63" xml:space="preserve">
-    <value> example: TlbImp MyModule.dll\1</value>
-  </data>
-  <data name="Msg_Usage_64" xml:space="preserve">
     <value />
   </data>
+  <data name="Msg_Usage_63" xml:space="preserve">
+    <value>A resource ID can optionally be appended to the TypeLibName when importing a</value>
+  </data>
+  <data name="Msg_Usage_64" xml:space="preserve">
+    <value>type library from a module containing multiple type libraries.</value>
+  </data>
   <data name="Msg_Usage_65" xml:space="preserve">
-    <value>New behaviors in TlbImp version 2 include:</value>
+    <value> example: TlbImp MyModule.dll\1</value>
   </data>
   <data name="Msg_Usage_66" xml:space="preserve">
+    <value />
+  </data>
+  <data name="Msg_Usage_67" xml:space="preserve">
+    <value>New behaviors in TlbImp version 2 include:</value>
+  </data>
+  <data name="Msg_Usage_68" xml:space="preserve">
     <value>    Convert VARIANT_BOOL in structures to bool.</value>
   </data>
   <data name="Wrn_AmbiguousReturn" xml:space="preserve">
@@ -584,5 +584,11 @@ Options:</value>
   </data>
   <data name="Msg_PropertyIsOmitted" xml:space="preserve">
     <value>Property '{0}' of type '{1}' is omitted.</value>
+  </data>
+  <data name="Msg_Usage_43" xml:space="preserve">
+    <value>    /removeenumprefix        Remove the common prefixes of enum fields, which</value>
+  </data>
+  <data name="Msg_Usage_44" xml:space="preserve">
+    <value>                             are equal to enum type name appended a "_".</value>
   </data>
 </root>

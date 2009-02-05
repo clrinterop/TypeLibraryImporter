@@ -40,7 +40,8 @@ public class RemoteTlbImp : MarshalByRefObject
                    String               strCopyright,
                    String               strTrademark,
                    bool                 isVersion2,
-                   bool                 isPreserveSig)
+                   bool                 isPreserveSig,
+                   bool                 isRemoveEnumPrefix)
     {
 
         TlbImpOptions options = new TlbImpOptions();
@@ -68,6 +69,7 @@ public class RemoteTlbImp : MarshalByRefObject
         options.m_strTrademark = strTrademark;
         options.m_isVersion2 = isVersion2;
         options.m_isPreserveSig = isPreserveSig;
+        options.m_isRemoveEnumPrefix = isRemoveEnumPrefix;
         
         return TlbImpCode.Run(options);
     }

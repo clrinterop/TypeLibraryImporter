@@ -132,6 +132,11 @@
     <Compile Include="PropertyInfo.cs" />
     <Compile Include="RemoteTlbImp.cs" />
     <Compile Include="Resource.cs" />
+    <Compile Include="Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="TlbImp.cs" />
     <Compile Include="tlbimpcode.cs" />
     <Compile Include="TlbImpOptions.cs" />
