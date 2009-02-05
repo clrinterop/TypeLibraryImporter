@@ -694,10 +694,22 @@ namespace tlbimp2
 
                 case VarEnum.VT_BOOL:
                     // For VT_BOOL in fields, use short if v2 switch is not specified.
-                    if (m_conversionType == ConversionType.Field && (!m_info.Settings.m_isVersion2))
-                        result = typeof(short);
+                    if (m_conversionType == ConversionType.Field)
+                    {
+                        if (m_info.Settings.m_isVersion2)
+                        {
+                            result = typeof(bool);
+                            m_attribute = CustomAttributeHelper.GetBuilderForMarshalAs(UnmanagedType.VariantBool);
+                        }
+                        else
+                        {
+                            result = typeof(short);
+                        }
+                    }
                     else
+                    {
                         result = typeof(bool);
+                    }
                     break;
 
                 default:
