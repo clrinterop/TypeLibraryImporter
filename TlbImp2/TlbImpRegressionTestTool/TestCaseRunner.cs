@@ -71,8 +71,8 @@ namespace TlbImpRegressionTestTool
         {
             try
             {
-                FileStream file1 = new FileStream(fileFullPath1, FileMode.Open);
-                FileStream file2 = new FileStream(fileFullPath2, FileMode.Open);
+                FileStream file1 = new FileStream(fileFullPath1, FileMode.Open, FileAccess.Read);
+                FileStream file2 = new FileStream(fileFullPath2, FileMode.Open, FileAccess.Read);
                 if (file1.Length != file2.Length)
                 {
                     file1.Close();
