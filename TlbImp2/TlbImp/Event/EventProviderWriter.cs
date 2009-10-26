@@ -23,6 +23,10 @@ namespace tlbimp2.Event
     {
         private const BindingFlags DefaultLookup = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public;
 
+#if USING_NETFX_4
+        private readonly Type[] MonitorEnterParamTypes = new Type[] { typeof(Object), Type.GetType("System.Boolean&") };
+#endif // !USING_NETFX_4
+        
         public EventProviderWriter(ModuleBuilder OutputModule, String strDestTypeName, Type EventItfType, Type SrcItfType, Type SinkHelperType)
         {
             m_OutputModule = OutputModule;
@@ -44,8 +48,8 @@ namespace tlbimp2.Event
 
             // Create the event source field.
             FieldBuilder fbCPC = OutputTypeBuilder.DefineField(
-                "m_ConnectionPointContainer",
-                typeof(IConnectionPointContainer),
+                "m_wkConnectionPointContainer",
+                typeof(WeakReference),
                 FieldAttributes.Private
                 );
 
@@ -121,9 +125,14 @@ namespace tlbimp2.Event
             MethodInfo ArrayListAddMethod = typeof(ArrayList).GetMethod("Add", aParamTypes, null);
             Debug.Assert(ArrayListAddMethod != null, "Unable to find the method ArrayList.Add");
 
+#if !USING_NETFX_4
             // Retrieve the Monitor.Enter(Object) method.            
             aParamTypes[0] = typeof(Object);
             MethodInfo MonitorEnterMethod = typeof(Monitor).GetMethod("Enter", aParamTypes, null);
+#else            
+            // Retrieve the Monitor.Enter(Object, ref bool) method.            
+            MethodInfo MonitorEnterMethod = typeof(Monitor).GetMethod("Enter", MonitorEnterParamTypes, null);
+#endif // !USING_NETFX_4
             Debug.Assert(MonitorEnterMethod != null, "Unable to find the method Monitor.Enter()");
 
             // Retrieve the Monitor.Exit() method.
@@ -150,14 +159,26 @@ namespace tlbimp2.Event
             LocalBuilder ltSinkHelper = il.DeclareLocal(SinkHelperClass);
             LocalBuilder ltCookie = il.DeclareLocal(typeof(Int32));
 
+#if !USING_NETFX_4
             // Generate the following code:
             //   Monitor.Enter(this);
             il.Emit(OpCodes.Ldarg, (short)0);
             il.Emit(OpCodes.Call, MonitorEnterMethod);
+#else
+            LocalBuilder ltLockTaken = il.DeclareLocal(typeof(bool));
+#endif // !USING_NETFX_4
 
             // Generate the following code:
             //   try {
             il.BeginExceptionBlock();
+
+#if USING_NETFX_4
+            // Generate the following code:
+            //   Monitor.Enter(this, ref lockTaken);
+            il.Emit(OpCodes.Ldarg, (short)0);
+            il.Emit(OpCodes.Ldloca_S, ltLockTaken);
+            il.Emit(OpCodes.Call, MonitorEnterMethod);
+#endif // USING_NETFX_4
 
             // Generate the following code:
             //   if ( m_IFooEventsCP != null ) goto EventCPNonNullLabel;
@@ -217,10 +238,22 @@ namespace tlbimp2.Event
             //   } finally {
             il.BeginFinallyBlock();
 
+#if !USING_NETFX_4
             // Generate the following code:
             //   Monitor.Exit(this);
             il.Emit(OpCodes.Ldarg, (short)0);
             il.Emit(OpCodes.Call, MonitorExitMethod);
+#else
+            // Generate the following code:
+            //   if (lockTaken)
+            //      Monitor.Exit(this);
+            Label skipExit = il.DefineLabel();
+            il.Emit(OpCodes.Ldloc, ltLockTaken);
+            il.Emit(OpCodes.Brfalse_S, skipExit);
+            il.Emit(OpCodes.Ldarg, (short)0);
+            il.Emit(OpCodes.Call, MonitorExitMethod);
+            il.MarkLabel(skipExit);
+#endif // !USING_NETFX_4
 
             // Generate the following code:
             //   }
@@ -267,9 +300,14 @@ namespace tlbimp2.Event
             MethodInfo DelegateEqualsMethod = typeof(Delegate).GetMethod("Equals", aParamTypes, null);
             Debug.Assert(DelegateEqualsMethod != null, "Unable to find the method Delegate.Equlals()");
 
+#if !USING_NETFX_4
             // Retrieve the Monitor.Enter(Object) method.
             aParamTypes[0] = typeof(Object);
             MethodInfo MonitorEnterMethod = typeof(Monitor).GetMethod("Enter", aParamTypes, null);
+#else
+            // Retrieve the Monitor.Enter(Object, ref bool) method.
+            MethodInfo MonitorEnterMethod = typeof(Monitor).GetMethod("Enter", MonitorEnterParamTypes, null);
+#endif // !USING_NETFX_4
 
             Debug.Assert(MonitorEnterMethod != null, "Unable to find the method Monitor.Enter()");
 
@@ -302,6 +340,9 @@ namespace tlbimp2.Event
             LocalBuilder ltNumSinkHelpers = il.DeclareLocal(typeof(Int32));
             LocalBuilder ltSinkHelperCounter = il.DeclareLocal(typeof(Int32));
             LocalBuilder ltCurrSinkHelper = il.DeclareLocal(SinkHelperClass);
+#if USING_NETFX_4
+            LocalBuilder ltLockTaken = il.DeclareLocal(typeof(bool));
+#endif // USING_NETFX_4
  
 
             // Generate the labels for the for loop.
@@ -310,15 +351,25 @@ namespace tlbimp2.Event
             Label FalseIfLabel = il.DefineLabel();
             Label MonitorExitLabel = il.DefineLabel();
 
+#if !USING_NETFX_4
             // Generate the following code:
             //   Monitor.Enter(this);
             il.Emit(OpCodes.Ldarg, (short)0);
             il.Emit(OpCodes.Call, MonitorEnterMethod);
+#endif // !USING_NETFX_4
 
             // Generate the following code:
             //   try {
             il.BeginExceptionBlock();
 
+#if USING_NETFX_4
+            // Generate the following code:
+            //   Monitor.Enter(this, ref lockTaken);
+            il.Emit(OpCodes.Ldarg, (short)0);
+            il.Emit(OpCodes.Ldloca_S, ltLockTaken);
+            il.Emit(OpCodes.Call, MonitorEnterMethod);
+#endif // USING_NETFX_4
+ 
             // Generate the following code:
             //   if ( m_aIFooEventsHelpers == null ) goto ForEndLabel;		
             il.Emit(OpCodes.Ldarg, (short)0);
@@ -439,10 +490,22 @@ namespace tlbimp2.Event
             //   } finally {
             il.BeginFinallyBlock();
 
+#if !USING_NETFX_4
             // Generate the following code:
             //   Monitor.Exit(this);
             il.Emit(OpCodes.Ldarg, (short)0);
             il.Emit(OpCodes.Call, MonitorExitMethod);
+#else
+            // Generate the following code:
+            //   if (lockTaken)
+            //      Monitor.Exit(this);
+            Label skipExit = il.DefineLabel();
+            il.Emit(OpCodes.Ldloc, ltLockTaken);
+            il.Emit(OpCodes.Brfalse_S, skipExit);
+            il.Emit(OpCodes.Ldarg, (short)0);
+            il.Emit(OpCodes.Call, MonitorExitMethod);
+            il.MarkLabel(skipExit);
+#endif // !USING_NETFX_4
 
             // Generate the following code:
             //   }
@@ -472,6 +535,10 @@ namespace tlbimp2.Event
             // Retrieve the IConnectionPointContainer.FindConnectionPoint() method.
             MethodInfo CPCFindCPMethod = typeof(IConnectionPointContainer).GetMethod("FindConnectionPoint");
             Debug.Assert(CPCFindCPMethod != null, "Unable to find the method ConnectionPointContainer.FindConnectionPoint()");
+
+            // Retrieve the WeakReference.Target method.
+            MethodInfo WRget_Target = typeof(WeakReference).GetMethod("get_Target");
+            Debug.Assert(WRget_Target != null, "Unable to find the property WeakReference.Target");
 
             // Define the Init method itself.
             MethodBuilder Meth = OutputTypeBuilder.DefineMethod(
@@ -518,9 +585,11 @@ namespace tlbimp2.Event
             il.Emit(OpCodes.Call, ByteArrayGUIDCons);
 
             // Generate the following code:
-            //   m_ConnectionPointContainer.FindConnectionPoint( EventItfGuid, CP );
+            //   ((IConnectionPointContainer)(m_wkConnectionPointContainer.Target)).FindConnectionPoint( EventItfGuid, CP );
             il.Emit(OpCodes.Ldarg, (short)0);
             il.Emit(OpCodes.Ldfld, fbCPC);
+            il.Emit(OpCodes.Callvirt, WRget_Target);
+            il.Emit(OpCodes.Castclass, typeof(IConnectionPointContainer));
             il.Emit(OpCodes.Ldloca, ltEvGuid);
             il.Emit(OpCodes.Ldloca, ltCP);
             il.Emit(OpCodes.Callvirt, CPCFindCPMethod);
@@ -550,6 +619,14 @@ namespace tlbimp2.Event
             ConstructorInfo DefaultBaseClsCons = typeof(Object).GetConstructor(BindingFlags.Instance | BindingFlags.Public, null, new Type[0], null);
             Debug.Assert(DefaultBaseClsCons != null, "Unable to find the object's public default constructor");
 
+            // Retrieve the constructor info for WeakReference::.ctor(object, bool).
+            Type[] aParamTypes = new Type[2];
+            aParamTypes[0] = typeof(object);
+            aParamTypes[1] = typeof(bool);
+            ConstructorInfo WeakReferenceCons = typeof(WeakReference).GetConstructor(EventProviderWriter.DefaultLookup, null, aParamTypes, null);
+            Debug.Assert(WeakReferenceCons != null, "Unable to find the constructor for WeakReference that accepts an object and a bool as arguments");
+
+
             // Define the default constructor.
             MethodAttributes ctorAttributes = MethodAttributes.SpecialName | (DefaultBaseClsCons.Attributes & MethodAttributes.MemberAccessMask);
             MethodBuilder Cons = OutputTypeBuilder.DefineMethod(
@@ -565,10 +642,12 @@ namespace tlbimp2.Event
             il.Emit(OpCodes.Call, DefaultBaseClsCons);
 
             // Generate the following code:
-            //   m_ConnectionPointContainer = (IConnectionPointContainer)EventSource;
+            //   m_wkConnectionPointContainer = new WeakReference((IConnectionPointContainer)EventSource, false);
             il.Emit(OpCodes.Ldarg, (short)0);
             il.Emit(OpCodes.Ldarg, (short)1);
             il.Emit(OpCodes.Castclass, typeof(IConnectionPointContainer));
+            il.Emit(OpCodes.Ldc_I4_0);
+            il.Emit(OpCodes.Newobj, WeakReferenceCons);
             il.Emit(OpCodes.Stfld, fbCPC);
 
             // Generate the return opcode.
@@ -601,12 +680,21 @@ namespace tlbimp2.Event
             MethodInfo ReleaseComObjectMethod = typeof(System.Runtime.InteropServices.Marshal).GetMethod("ReleaseComObject");
             Debug.Assert(ReleaseComObjectMethod != null, "Unable to find the method Marshal.ReleaseComObject()");
 
+#if !USING_NETFX_4
             // Retrieve the Monitor.Enter(Object, ref bool) method.
             Type[] aParamTypes = new Type[] { typeof(Object) };
             MethodInfo MonitorEnterMethod = typeof(Monitor).GetMethod("Enter", aParamTypes, null);
+#else
+            // Retrieve the Monitor.Enter(Object, ref bool) method.
+            MethodInfo MonitorEnterMethod = typeof(Monitor).GetMethod("Enter", MonitorEnterParamTypes, null);
+#endif // !USING_NETFX_4
             Debug.Assert(MonitorEnterMethod != null, "Unable to find the method Monitor.Enter()");
 
             // Retrieve the Monitor.Exit() method.
+#if USING_NETFX_4
+            Type[] aParamTypes = new Type[] { typeof(Object) };
+#endif // USING_NETFX_4
+
             MethodInfo MonitorExitMethod = typeof(Monitor).GetMethod("Exit", aParamTypes, null);
             Debug.Assert(MonitorExitMethod != null, "Unable to find the method Monitor.Exit()");
 
@@ -619,16 +707,26 @@ namespace tlbimp2.Event
             LocalBuilder ltNumSinkHelpers = il.DeclareLocal(typeof(Int32));
             LocalBuilder ltSinkHelperCounter = il.DeclareLocal(typeof(Int32));
             LocalBuilder ltCurrSinkHelper = il.DeclareLocal(SinkHelperClass);
-
+#if !USING_NETFX_4
             // Generate the following code:
             //   Monitor.Enter(this);
             il.Emit(OpCodes.Ldarg, (short)0);
             il.Emit(OpCodes.Call, MonitorEnterMethod);
+#else
+            LocalBuilder ltLockTaken = il.DeclareLocal(typeof(bool));
+#endif // !USING_NETFX_4
 
             // Generate the following code:
             //   try {
             il.BeginExceptionBlock();
 
+#if USING_NETFX_4
+            // Generate the following code:
+            //   Monitor.Enter(this, ref lockTaken);
+            il.Emit(OpCodes.Ldarg, (short)0);
+            il.Emit(OpCodes.Ldloca_S, ltLockTaken);
+            il.Emit(OpCodes.Call, MonitorEnterMethod);
+#endif // USING_NETFX_4
             // Generate the labels.
             Label ForBeginLabel = il.DefineLabel();
             Label ReleaseComObjectLabel = il.DefineLabel();
@@ -711,10 +809,22 @@ namespace tlbimp2.Event
             //   } finally {
             il.BeginFinallyBlock();
 
+#if !USING_NETFX_4
             // Generate the following code:
             //   Monitor.Exit(this);
             il.Emit(OpCodes.Ldarg, (short)0);
             il.Emit(OpCodes.Call, MonitorExitMethod);
+#else
+            // Generate the following code:
+            //   if (lockTaken)
+            //      Monitor.Exit(this);
+            Label skipExit = il.DefineLabel();
+            il.Emit(OpCodes.Ldloc, ltLockTaken);
+            il.Emit(OpCodes.Brfalse_S, skipExit);
+            il.Emit(OpCodes.Ldarg, (short)0);
+            il.Emit(OpCodes.Call, MonitorExitMethod);
+            il.MarkLabel(skipExit);
+#endif // !USING_NETFX_4
 
             // Generate the following code:
             //   }

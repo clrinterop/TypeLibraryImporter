@@ -12,7 +12,6 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.ComTypes;
 
 // I created this file because System.Runtime.InteropServices.ComTypes is busted.
 
@@ -177,18 +176,8 @@ namespace TypeLibTypes.Interop
     {
         public TYPEDESC tdescElem;
         public short cDims;
+        public SAFEARRAYBOUND firstBound;
     }
-
-    /*
-    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-    public struct ARRAYDESC
-    {
-        TYPEDESC tdescelem;
-        ushort cDims;
-        [MarshalAs(UnmanagedType.ByValArray, Size
-        SAFEARRAYBOUND[]
-    }
-    */
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
     public struct SAFEARRAYBOUND
@@ -349,7 +338,7 @@ namespace TypeLibTypes.Interop
     public interface ITypeInfo
     {
         void GetTypeAttr(out IntPtr ppTypeAttr);
-        void GetTypeComp(out ITypeComp ppTComp);
+        void GetTypeComp(out System.Runtime.InteropServices.ComTypes.ITypeComp ppTComp);
         void GetFuncDesc(int index, out IntPtr ppFuncDesc);
         void GetVarDesc(int index, out IntPtr ppVarDesc);
         void GetNames(int memid, IntPtr rgBstrNames, int cMaxNames, out int pcNames);
@@ -382,7 +371,7 @@ namespace TypeLibTypes.Interop
     public interface ITypeInfo2 : ITypeInfo
     {
         new void GetTypeAttr(out IntPtr ppTypeAttr);
-        new void GetTypeComp(out ITypeComp ppTComp);
+        new void GetTypeComp(out System.Runtime.InteropServices.ComTypes.ITypeComp ppTComp);
         new void GetFuncDesc(int index, out IntPtr ppFuncDesc);
         new void GetVarDesc(int index, out IntPtr ppVarDesc);
         new void GetNames(int memid, IntPtr rgBstrNames, int cMaxNames, out int pcNames);
@@ -470,7 +459,7 @@ namespace TypeLibTypes.Interop
         void GetTypeInfoType(int index, out TYPEKIND pTKind);
         void GetTypeInfoOfGuid(ref Guid guid, out ITypeInfo ppTInfo);
         void GetLibAttr(out IntPtr ppTLibAttr);
-        void GetTypeComp(out ITypeComp ppTComp);
+        void GetTypeComp(out System.Runtime.InteropServices.ComTypes.ITypeComp ppTComp);
         void GetDocumentation(int index, out String strName, out String strDocString, out int dwHelpContext, out String strHelpFile);
         [return: MarshalAs(UnmanagedType.Bool)]
         bool IsName([MarshalAs(UnmanagedType.LPWStr)] String szNameBuf, int lHashVal);
@@ -491,7 +480,7 @@ namespace TypeLibTypes.Interop
         new void GetTypeInfoType(int index, out TYPEKIND pTKind);
         new void GetTypeInfoOfGuid(ref Guid guid, out ITypeInfo ppTInfo);
         new void GetLibAttr(out IntPtr ppTLibAttr);
-        new void GetTypeComp(out ITypeComp ppTComp);
+        new void GetTypeComp(out System.Runtime.InteropServices.ComTypes.ITypeComp ppTComp);
         new void GetDocumentation(int index, out String strName, out String strDocString, out int dwHelpContext, out String strHelpFile);
         [return: MarshalAs(UnmanagedType.Bool)]
         new bool IsName([MarshalAs(UnmanagedType.LPWStr)] String szNameBuf, int lHashVal);

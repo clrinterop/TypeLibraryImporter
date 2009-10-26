@@ -37,9 +37,9 @@ namespace tlbimp2
         /// <summary>
         /// Get the event delegate
         /// </summary>
-        /// <param name="n">Function id</param>
+        /// <param name="memberInfo">The MemberInfo of a source interface that is used to create this delegate</param>
         /// <returns>The delegate type</returns>
-        Type GetEventDelegate(int n);
+        Type GetEventDelegate(InterfaceMemberInfo memberInfo);
     }
 
     /// <summary>
@@ -176,27 +176,26 @@ namespace tlbimp2
         /// </summary>
         /// <param name="index">Function index</param>
         /// <returns>The delegate type</returns>
-        public Type GetEventDelegate(int index)
+        public Type GetEventDelegate(InterfaceMemberInfo memberInfo)
         {
-            TypeInfo type = m_convInterface.RefNonAliasedTypeInfo;
+            TypeInfo type = memberInfo.RefTypeInfo;
             using (TypeAttr attr = type.GetTypeAttr())
             {
-
                 // Create m_delegateTypes on demand
                 if (m_delegateTypes == null)
                 {
-                    m_delegateTypes = new Type[attr.cFuncs];
+                    m_delegateTypes = new Dictionary<InterfaceMemberInfo, Type>();
                 }
 
                 //
                 // Check if we already have a delegate type for method n
                 //
-                if (m_delegateTypes[index] == null)
+                if (!m_delegateTypes.ContainsKey(memberInfo))
                 {
                     //
                     // If not, create a new delegate
                     //
-                    FuncDesc func = type.GetFuncDesc(index);
+                    FuncDesc func = type.GetFuncDesc(memberInfo.Index);
 
                     string eventName = type.GetDocumentation(func.memid);
                     string delegateName = m_info.GetRecommendedManagedName(m_convInterface.RefTypeInfo, ConvType.Interface, true) + "_" + type.GetDocumentation(func.memid) + "EventHandler";
@@ -217,7 +216,7 @@ namespace tlbimp2
                     // Create methods for the delegate
                     InterfaceInfo interfaceInfoForDelegate = new InterfaceInfo(m_info, delegateTypeBuilder, false, type, attr, false, true);
                     interfaceInfoForDelegate.AllowNewEnum = !m_convInterface.ImplementsIEnumerable;
-                    ConvCommon.CreateMethodForDelegate(interfaceInfoForDelegate, func, index);
+                    ConvCommon.CreateMethodForDelegate(interfaceInfoForDelegate, func, memberInfo.Index);
 
                     // Emit ComVisibleAttribute(false)
                     delegateTypeBuilder.SetCustomAttribute(CustomAttributeHelper.GetBuilderForComVisible(false));
@@ -226,11 +225,11 @@ namespace tlbimp2
                     delegateTypeBuilder.SetCustomAttribute(CustomAttributeHelper.GetBuilderForTypeLibType(TypeLibTypeFlags.FHidden));
 
                     // Create the delegate
-                    m_delegateTypes[index] = delegateTypeBuilder.CreateType();
+                    m_delegateTypes[memberInfo] = delegateTypeBuilder.CreateType();
                 }
             }
 
-            return m_delegateTypes[index];
+            return m_delegateTypes[memberInfo];
         }
 
         #region IConvBase Members
@@ -253,7 +252,7 @@ namespace tlbimp2
         #region Private members
 
         private IConvInterface m_convInterface;
-        private Type[] m_delegateTypes;                     // Keeps a mapping of delegate types & function id. Created on-demand.
+        private Dictionary<InterfaceMemberInfo, Type> m_delegateTypes;                     // Keeps a mapping of delegate types & function id. Created on-demand.
         private string m_eventProviderName;
         #endregion 
     }

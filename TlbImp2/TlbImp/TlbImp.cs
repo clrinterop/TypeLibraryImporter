@@ -24,6 +24,11 @@ using FormattedOutput;
 using System.Security;
 using CoreRuleEngine;
 using TlbImpRuleEngine;
+using System.Collections.Generic;
+
+#if USING_NETFX_4
+using System.Runtime.ExceptionServices;
+#endif // !USING_NETFX_4
 
 namespace tlbimp2
 {
@@ -34,6 +39,9 @@ internal class TlbImp
     private const int ErrorReturnCode = 100;
     private const int MAX_PATH = 260;
 
+#if USING_NETFX_4
+    [HandleProcessCorruptedStateExceptions()]       // Support catching AV in 4.0
+#endif // !USING_NETFX_4
     public static int Main(String []aArgs)
     {
         int retCode = SuccessReturnCode;
@@ -158,12 +166,17 @@ internal class TlbImp
         }
 
         // Retrieve the full path name of the output file.
-        if ("".Equals(Path.GetExtension(s_Options.m_strAssemblyName)))
-        {
-            s_Options.m_strAssemblyName = s_Options.m_strAssemblyName + ".dll";
-        }
         if (s_Options.m_strAssemblyName != null)
         {
+            if (Directory.Exists(s_Options.m_strAssemblyName))
+                throw new TlbImpGeneralException(Resource.FormatString("Err_OutputCannotBeDirectory"), ErrorCode.Err_OutputCannotBeDirectory);
+
+            if ("".Equals(Path.GetExtension(s_Options.m_strAssemblyName)))
+            {
+                s_Options.m_strAssemblyName = s_Options.m_strAssemblyName + ".dll";
+            }
+
+            // Retrieve the full path name of the output file.
             try
             {
                 s_Options.m_strAssemblyName = (new FileInfo(s_Options.m_strAssemblyName)).FullName;
@@ -172,10 +185,8 @@ internal class TlbImp
             {
                 throw new TlbImpGeneralException(Resource.FormatString("Err_OutputFileNameTooLong", s_Options.m_strAssemblyName), ErrorCode.Err_OutputFileNameTooLong);
             }
-
-            if (Directory.Exists(s_Options.m_strAssemblyName))
-                throw new TlbImpGeneralException(Resource.FormatString("Err_OutputCannotBeDirectory"), ErrorCode.Err_OutputCannotBeDirectory);
         }
+
 
         // Determine the output directory for the generated assembly.
         if (s_Options.m_strAssemblyName != null)
@@ -301,6 +312,9 @@ internal class TlbImp
             return false;
         }
 
+        List<string> assemblyRefList = new List<string>();
+        List<string> typeLibRefList = new List<string>();
+
         // Get the name of the COM typelib.
         Options.m_strTypeLibName = cmdLine.GetNextArg();
 
@@ -338,11 +352,21 @@ internal class TlbImp
                     ReturnCode = ErrorReturnCode;
                     return false;
                 }
-                
+
                 if (Options.m_strAssemblyRefList == null)
+                {
+                    assemblyRefList.Clear();
+                    assemblyRefList.Add(FullPath.ToLower());
                     Options.m_strAssemblyRefList = FullPath;
+                }
                 else
-                    Options.m_strAssemblyRefList = Options.m_strAssemblyRefList + ";" + FullPath;
+                {
+                    if (!assemblyRefList.Contains(FullPath.ToLower())) {
+                        assemblyRefList.Add(FullPath.ToLower());
+                        Options.m_strAssemblyRefList =
+                            Options.m_strAssemblyRefList + ";" + FullPath;
+                    }
+                }
             }
             else if (opt.Name.Equals("tlbreference"))
             {
@@ -354,11 +378,21 @@ internal class TlbImp
                     ReturnCode = ErrorReturnCode;
                     return false;
                 }
-                
-                if (Options.m_strTypeLibRefList == null)
+
+                if (Options.m_strTypeLibRefList == null) {
+                    typeLibRefList.Clear();
+                    typeLibRefList.Add(FullPath.ToLower());
                     Options.m_strTypeLibRefList = FullPath;
+                }
                 else
-                    Options.m_strTypeLibRefList = Options.m_strTypeLibRefList + ";" + FullPath;
+                {
+                    if (!typeLibRefList.Contains(FullPath.ToLower()))
+                    {
+                        typeLibRefList.Add(FullPath.ToLower());
+                        Options.m_strTypeLibRefList =
+                            Options.m_strTypeLibRefList + ";" + FullPath;
+                    }
+                }
             }
             else if (opt.Name.Equals("delaysign"))
             {

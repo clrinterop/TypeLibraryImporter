@@ -219,6 +219,12 @@ namespace tlbimp2
             return new CustomAttributeBuilder(ctorDispId, new Object[] { dispId });
         }
 
+        public static CustomAttributeBuilder GetBuilderForPreserveSig()
+        {
+            ConstructorInfo ctorPreserveSig = typeof(PreserveSigAttribute).GetConstructor(new Type[] { });
+            return new CustomAttributeBuilder(ctorPreserveSig, new Object[] { });
+        }
+
         public static CustomAttributeBuilder GetBuilderForCoClass(Type coclass)
         {
             ConstructorInfo ctorCoClass = typeof(CoClassAttribute).GetConstructor(new Type[] { typeof(Type) });

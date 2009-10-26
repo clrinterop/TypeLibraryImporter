@@ -707,12 +707,17 @@ namespace tlbimp2
                                 m_attribute = CustomAttributeHelper.GetBuilderForMarshalAsConstArray(arrayType, (int)elements);
                             else
                             {
-                                if (elemTypeConverter.UnmanagedType == UnmanagedType.BStr  || 
-                                    elemTypeConverter.UnmanagedType == UnmanagedType.LPStr || 
-                                    elemTypeConverter.UnmanagedType == UnmanagedType.LPWStr)
+                                if (elemTypeConverter.UnmanagedType == UnmanagedType.BStr   || 
+                                    elemTypeConverter.UnmanagedType == UnmanagedType.LPStr  || 
+                                    elemTypeConverter.UnmanagedType == UnmanagedType.LPWStr ||
+                                    elemTypeConverter.UnmanagedType == UnmanagedType.VariantBool)
+                                {
                                     m_attribute = CustomAttributeHelper.GetBuilderForMarshalAsConstArray(arrayType, (int)elements, elemTypeConverter.UnmanagedType);
+                                }
                                 else
+                                {
                                     m_attribute = CustomAttributeHelper.GetBuilderForMarshalAsConstArray(arrayType, (int)elements);
+                                }
                             }
 
                             SetUnmanagedType(arrayType);
@@ -736,6 +741,7 @@ namespace tlbimp2
                         {
                             result = typeof(bool);
                             m_attribute = CustomAttributeHelper.GetBuilderForMarshalAs(UnmanagedType.VariantBool);
+                            SetUnmanagedType(UnmanagedType.VariantBool);
                         }
                         else
                         {
@@ -745,6 +751,7 @@ namespace tlbimp2
                     else
                     {
                         result = typeof(bool);
+                        SetUnmanagedType(UnmanagedType.VariantBool);
                     }
                     break;
 

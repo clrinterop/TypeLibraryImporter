@@ -15,7 +15,6 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime;
 using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.ComTypes;
 using System.Runtime.CompilerServices;
 using System.Diagnostics;
 using TypeLibTypes.Interop;
@@ -110,13 +109,69 @@ namespace tlbimp2
             // real interface
             // This must be done before creating the coclass because coclass needs this information
             // Only do so when the default interface is exclusively belongs to one coclass
+            
             if (m_convInterface != null && m_isExclusive)
-                m_convInterface.AssociateWithExclusiveClassInterface(this as IConvClassInterface);
+            {
+                // Check if the default interface -> class interface relationship exists in the default
+                // interface's type lib. That means we only need to check if the default interface and
+                // the coclass are in the same type library.
+                TypeLib typeLib = m_convInterface.RefTypeInfo.GetContainingTypeLib();
+                Guid libIdOfDefaultInterface;
+                using (TypeLibAttr libAttr = typeLib.GetLibAttr())
+                {
+                    libIdOfDefaultInterface = libAttr.guid;
+                }
+                Guid libIdOfCoclass;
+                TypeLib coclassTypeLib = m_coclassTypeInfo.GetContainingTypeLib();
+                using (TypeLibAttr libAttr = coclassTypeLib.GetLibAttr())
+                {
+                    libIdOfCoclass = libAttr.guid;
+                }
+                if (libIdOfDefaultInterface.Equals(libIdOfCoclass))
+                {
+                    m_convInterface.AssociateWithExclusiveClassInterface(this as IConvClassInterface);
+                }
+            }
 
             // Emit GuidAttribute, which is the same as the default interface, if it exists
+            // If there is no default Interface here, and the coclass implements IDispatch or IUnknown as non-source
+            // interface, we use the IDispatch or IUnknown's guid.
             if (defaultInterfaceType != null)
             {
                 ConvCommon.DefineGuid(m_convInterface.RefTypeInfo, m_convInterface.RefNonAliasedTypeInfo, m_typeBuilder);
+            }
+            else
+            {
+                TypeInfo ImplementedIDispatchOrIUnknownTypeInfo = null;
+                using (TypeAttr attr = m_coclassTypeInfo.GetTypeAttr())
+                {
+                    for (int m = 0; m < attr.cImplTypes; ++m)
+                    {
+                        TypeLibTypes.Interop.IMPLTYPEFLAGS flags = m_coclassTypeInfo.GetImplTypeFlags(m);
+                        bool bDefault = (flags & TypeLibTypes.Interop.IMPLTYPEFLAGS.IMPLTYPEFLAG_FDEFAULT) != 0;
+                        bool bSource = (flags & TypeLibTypes.Interop.IMPLTYPEFLAGS.IMPLTYPEFLAG_FSOURCE) != 0;
+
+                        TypeInfo typeImpl = m_coclassTypeInfo.GetRefType(m);
+                        using (TypeAttr attrImpl = typeImpl.GetTypeAttr())
+                        {
+                            if (attrImpl.Guid == WellKnownGuids.IID_IDispatch ||
+                                attrImpl.Guid == WellKnownGuids.IID_IUnknown)
+                            {
+                                // If more than one IDispatch or IUnknown exist, we will pick the default one;
+                                // If none of them is with the default flag, pick the first one.
+                                if (!bSource && (bDefault || ImplementedIDispatchOrIUnknownTypeInfo == null))
+                                {
+                                    ImplementedIDispatchOrIUnknownTypeInfo = typeImpl;
+                                }
+                            }
+                        }
+                    }
+                }
+                if (ImplementedIDispatchOrIUnknownTypeInfo != null)
+                {
+                    ConvCommon.DefineGuid(ImplementedIDispatchOrIUnknownTypeInfo,
+                        ImplementedIDispatchOrIUnknownTypeInfo, m_typeBuilder);
+                }
             }
 
             // Make sure we know about the class interface before we go to define the coclass in the next statement
@@ -125,7 +180,12 @@ namespace tlbimp2
 
             // Handle [CoClass(typeof(...))]
             Type typeRefCoClass = m_info.GetTypeRef(ConvType.CoClass, m_coclassTypeInfo).ManagedType;
-            m_typeBuilder.SetCustomAttribute(CustomAttributeHelper.GetBuilderForCoClass(typeRefCoClass));
+            ConstructorInfo ctorCoClassAttribute = typeof(CoClassAttribute).GetConstructor(
+                    new Type[] { typeof(Type) });
+            // For back compatibility, use full name to create CoClassAttribute, instead of assembly qualified name.
+            CustomAttributeBlobBuilder blobBuilder = new CustomAttributeBlobBuilder();
+            blobBuilder.AddFixedArg(typeRefCoClass.FullName);
+            m_typeBuilder.SetCustomAttribute(ctorCoClassAttribute, blobBuilder.GetBlob());
 
         }
                    

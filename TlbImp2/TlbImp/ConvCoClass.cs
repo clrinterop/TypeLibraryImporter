@@ -83,6 +83,8 @@ namespace tlbimp2
 
                         IConvInterface convInterface = (IConvInterface)m_info.GetTypeRef(ConvType.Interface, typeImpl);
 
+                        ConvCommon.ThrowIfImplementingExportedClassInterface(RefTypeInfo, convInterface);
+
                         // For source interfaces, try create the event interface
                         // Could be already created if it is the default source interface
                         if (isSource)
@@ -187,7 +189,7 @@ namespace tlbimp2
 
                 // Check to see if the default interface has a member with a DISPID of DISPID_NEWENUM.
                 if (defaultInterfaceTypeInfo != null)
-                    if (!implementsIEnumerable && ConvCommon.HasNewEnumMember(m_info, defaultInterfaceTypeInfo))
+                    if (!implementsIEnumerable && ConvCommon.HasNewEnumMember(m_info, defaultInterfaceTypeInfo, name))
                         implTypeList.Add(typeof(System.Collections.IEnumerable));
 
                 // Check to see if the IEnumerable Custom Value exists on the CoClass if doesn't inherit from IEnumerable yet

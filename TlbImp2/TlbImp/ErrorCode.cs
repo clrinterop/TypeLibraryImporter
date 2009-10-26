@@ -59,6 +59,8 @@ namespace tlbimp2
         Err_CanotFindReferencedType = 1033,
         Err_RefTypeLibMissing = 1034,
         Err_ConvertNonArrayToArray = 1035,
+        Err_ImplementExportedClassInterface = 1036,
+        Err_OverridedMethodNotFoundInImplementedInterface = 1037,
 
         // Command line error code: 2000~2999
         Err_AmbigousOption = 2001,

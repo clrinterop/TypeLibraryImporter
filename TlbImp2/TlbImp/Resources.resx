@@ -514,7 +514,7 @@ Options:</value>
     <value>Type library importer has encountered a method with multiple [lcid] parameters while importing '{0}.{1}'.</value>
   </data>
   <data name="Wrn_NotIUnknown" xml:space="preserve">
-    <value>Type library importer has encountered an interface not derived from IUnknown: '{0}'.</value>
+    <value>Type library importer has encountered an interface not derived from IUnknown: '{0}'. The interface is skipped.</value>
   </data>
   <data name="Wrn_ParamErrorNamed" xml:space="preserve">
     <value>Error while importing type: parameter referenced a type library that is not available (type: '{0}'; parameter: '{1}'; method: '{2}').</value>
@@ -565,7 +565,7 @@ Options:</value>
     <value>Cannot find type '{0}' in '{1}'. There could be a mismatch between the referenced assembly and the type library.</value>
   </data>
   <data name="Wrn_MultiNewEnum" xml:space="preserve">
-    <value>Tlbimp has encountered more than one function or property has dispid of NewEnum. This is not supported.</value>
+    <value>Tlbimp has encountered more than one function or property has dispid of NewEnum in '{0}'. Only '{1}' will be converted to GetEnumerator.</value>
   </data>
   <data name="Err_RefTypeLibMissing" xml:space="preserve">
     <value>Cannot resolve type library '{0}, {1}, {{{2}}}'. Please specify the full path name to this type library using /tlbreference and try again.</value>
@@ -611,5 +611,11 @@ Options:</value>
   </data>
   <data name="Wrn_LoadRuleFileFailed" xml:space="preserve">
     <value>Type library importer can not load rule file '{0}'. The rule file will be ignored. '{1}'</value>
+  </data>
+  <data name="Err_ImplementExportedClassInterface" xml:space="preserve">
+    <value>Type '{0}' from type library '{1}' is trying to implement class interface '{2}' from type library '{3}', which was exported by TlbExp. This scenario is not supported.</value>
+  </data>
+  <data name="Err_OverridedMethodNotFoundInImplementedInterface" xml:space="preserve">
+    <value>Cannot find '{0}' in '{1}' when implementing '{1}' in '{2}' from '{3}'.</value>
   </data>
 </root>

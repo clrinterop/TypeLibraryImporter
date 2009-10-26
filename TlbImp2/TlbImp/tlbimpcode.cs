@@ -512,7 +512,8 @@ public class TlbImpCode
             if (s_AssemblyRefs.Contains(TypeLibId))
             {
                 // If this is the same assembly and same version, just return
-                if (asm == s_AssemblyRefs[TypeLibId])
+                // Since asm is a RuntimeAssembly we can simply do object reference comparison
+                if ((object)asm == s_AssemblyRefs[TypeLibId])
                     return true;
 
                 // Otherwise, we have two versions of the same type assembly.
@@ -795,7 +796,7 @@ public class TlbImpCode
     }
 
     [DllImport("oleaut32.dll", CharSet = CharSet.Unicode, PreserveSig = false)]
-    public static extern void LoadTypeLibEx(String strTypeLibName, REGKIND regKind, out System.Runtime.InteropServices.ComTypes.ITypeLib TypeLib);
+    private static extern void LoadTypeLibEx(String strTypeLibName, REGKIND regKind, out System.Runtime.InteropServices.ComTypes.ITypeLib TypeLib);
 
     [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
     public static extern int SearchPath(String path, String fileName, String extension, int numBufferChars, StringBuilder buffer, int[] filePart);
@@ -899,27 +900,26 @@ internal class ImporterCallback : ITypeLibImporterNotifySink
                 // If that failed, try loading it using LoadFrom bassed on the codebase if specified.
                 if (strPIACodeBase != null)
                     rslt = Assembly.ReflectionOnlyLoadFrom(strPIACodeBase);
-                else
-                    throw;
             }
             catch (FileLoadException)
             {
                 // If that failed, try loading it using LoadFrom bassed on the codebase if specified.
                 if (strPIACodeBase != null)
                     rslt = Assembly.ReflectionOnlyLoadFrom(strPIACodeBase);
-                else
-                    throw;
             }
 
-            // Validate that the assembly is indeed a PIA.
-            if (!TlbImpCode.IsPrimaryInteropAssembly(rslt))
-                throw new TlbImpGeneralException(Resource.FormatString("Err_RegisteredPIANotPIA", rslt.GetName().Name, Marshal.GetTypeLibName((System.Runtime.InteropServices.ComTypes.ITypeLib)TypeLib)), ErrorCode.Err_RegisteredPIANotPIA);
+            if (rslt != null)
+            {
+                // Validate that the assembly is indeed a PIA.
+                if (!TlbImpCode.IsPrimaryInteropAssembly(rslt))
+                    throw new TlbImpGeneralException(Resource.FormatString("Err_RegisteredPIANotPIA", rslt.GetName().Name, Marshal.GetTypeLibName((System.Runtime.InteropServices.ComTypes.ITypeLib)TypeLib)), ErrorCode.Err_RegisteredPIANotPIA);
 
-            // If we are in verbose mode then display message indicating we successfully resolved the PIA.
-            if (TlbImpCode.s_Options.m_bVerboseMode)
-                Output.WriteInfo(Resource.FormatString("Msg_ResolvedRefToPIA", Marshal.GetTypeLibName(pTLB), rslt.GetName().Name), MessageCode.Msg_ResolvedRefToPIA);
+                // If we are in verbose mode then display message indicating we successfully resolved the PIA.
+                if (TlbImpCode.s_Options.m_bVerboseMode)
+                    Output.WriteInfo(Resource.FormatString("Msg_ResolvedRefToPIA", Marshal.GetTypeLibName(pTLB), rslt.GetName().Name), MessageCode.Msg_ResolvedRefToPIA);
 
-            return rslt;
+                return rslt;
+            }
         }
 
 

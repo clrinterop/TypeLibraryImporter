@@ -341,23 +341,6 @@ namespace tlbimp2
             return false;
         }
 
-        static private bool IsRetVal(ConverterInfo info, ParamDesc paramDesc, InterfaceMemberInfo memInfo)
-        {
-            if (paramDesc.IsRetval)
-            {
-                if (memInfo.RefVarDesc != null)
-                    return true;
-                else
-                {
-                    if (memInfo.RefFuncDesc.funckind == TypeLibTypes.Interop.FUNCKIND.FUNC_DISPATCH && !info.TransformDispRetVal)
-                        return false;
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
         /// <summary>
         /// Process parameters and apply attributes
         /// </summary>
@@ -379,11 +362,6 @@ namespace tlbimp2
                 //
                 if (index != 0)
                 {
-                    if (IsRetVal(info.ConverterInfo, param, memInfo))
-                    {
-                        attributes |= ParameterAttributes.Retval;
-                    }
-
                     // Always emit in/out information according to type library
                     if (param.IsIn)
                     {
@@ -920,9 +898,9 @@ namespace tlbimp2
             //
             // vtbl gap support. We only emit vtbl gap for non dispinterfaces
             //
-            if (!info.IsCoClass && !info.RefTypeAttr.IsDispatch)
+            if (!info.IsCoClass && !info.RefTypeAttr.IsDispatch && mode != CreateMethodMode.EventDelegateMode)
             {
-                int pointerSize = info.RefTypeAttr.cbSizeInstance;
+                int pointerSize = GetPointerSize(info.RefTypeInfo);
 
                 int slot = memberInfo.RefFuncDesc.oVft / pointerSize;
                 if (slot != info.CurrentSlot)
@@ -1050,15 +1028,40 @@ namespace tlbimp2
                     // Type.GetMethod(Name) won't have this problem. 
                     // We can workaround this limitation by having the coclass created after all the other types
 
-                    // Must use UniqueName because it is the right name on the interface
-                    MethodInfo methodInfo = interfaceType.GetMethod(memberInfo.UniqueName, paramTypes);
-                    Debug.Assert(methodInfo != null);
+                    // Must use UniqueName because it is the right name on the interface.
+                    // We should use exact match here.
+                    MethodInfo methodInfo = interfaceType.GetMethod(memberInfo.UniqueName,
+                        BindingFlags.ExactBinding | BindingFlags.Public | BindingFlags.Instance, null, paramTypes, null);
+
+                    if (methodInfo == null)
+                    {
+                        string expectedPrototypeString = FormatMethodPrototype(retType, memberInfo.UniqueName, paramTypes);
+                        string msg = Resource.FormatString("Err_OverridedMethodNotFoundInImplementedInterface",
+                                        new object[] { expectedPrototypeString, interfaceType.FullName,
+                                            info.TypeBuilder.FullName, info.TypeBuilder.Assembly.FullName });
+                        throw new TlbImpGeneralException(msg, ErrorCode.Err_OverridedMethodNotFoundInImplementedInterface);
+                    }
 
                     info.TypeBuilder.DefineMethodOverride(methodBuilder, methodInfo);
                 }
             }
 
             return methodBuilder;
+        }
+
+        private static string FormatMethodPrototype(Type retType, string funcName, Type[] paramTypes)
+        {
+            string prototypeString = retType + " " + funcName + "(";
+            for (int i = 0; i < paramTypes.Length; i++)
+            {
+                prototypeString += paramTypes[i];
+                if (i != paramTypes.Length - 1)
+                {
+                    prototypeString += ", ";
+                }
+            }
+            prototypeString += ")";
+            return prototypeString;
         }
 
         #region DISPID_NEWENUM Support
@@ -1068,37 +1071,32 @@ namespace tlbimp2
             return (typeInfo.GetCustData(CustomAttributeGuids.GUID_ForceIEnumerable) != null);
         }
 
-        static public bool HasNewEnumMember(ConverterInfo info, TypeInfo typeInfo)
+        static public bool HasNewEnumMember(ConverterInfo info, TypeInfo typeInfo, string fullName)
         {
             bool hasNewEnumMember = false;
+            bool hasDuplicateNewEnumMember = false;
+            int firstNewEnum = -1;
 
             using (TypeAttr attr = typeInfo.GetTypeAttr())
             {
                 if (attr.IsDispatch ||
                     (attr.IsInterface && ConvCommon.IsDerivedFromIDispatch(typeInfo)))
                 {
-                    // Check to see if the ForceIEnumerable custom value exists on the type
-                    if (HasForceIEnumerableCustomAttribute(typeInfo))
-                        hasNewEnumMember = true;
-
                     // Check to see if the interface has a function with a DISPID of DISPID_NEWENUM.
                     for (int i = 0; i < attr.cFuncs; ++i)
                     {
-                        using (FuncDesc func = typeInfo.GetFuncDesc(i))
+                        using(FuncDesc func = typeInfo.GetFuncDesc(i))
                         {
                             if (IsNewEnumFunc(info, typeInfo, func, i))
                             {
+                                if (!hasNewEnumMember)
+                                    firstNewEnum = func.memid;
+
                                 if (hasNewEnumMember)
-                                {
-                                    info.ReportEvent(
-                                        WarningCode.Wrn_MultiNewEnum,
-                                        Resource.GetString("Wrn_MultiNewEnum"));
-                                    break;
-                                }
+                                    hasDuplicateNewEnumMember = true;
 
                                 // The interface has a function with a DISPID of DISPID_NEWENUM.
                                 hasNewEnumMember = true;
-                                break;
                             }
                         }
                     }
@@ -1110,18 +1108,27 @@ namespace tlbimp2
                         {
                             if (IsNewEnumDispatchProperty(info, typeInfo, varDesc, i))
                             {
+                                if (!hasNewEnumMember)
+                                    firstNewEnum = varDesc.memid;
+
                                 if (hasNewEnumMember)
-                                {
-                                    // Throw a warning if we find more than one func with DISPID_NEWENUM.
-                                    string msg = Resource.FormatString("Wrn_InvalidTypeInfo", typeInfo.GetDocumentation());
-                                    info.ReportEvent(WarningCode.Wrn_InvalidTypeInfo, msg);
-                                }
+                                    hasDuplicateNewEnumMember = true;
 
                                 // The interface has a property with a DISPID of DISPID_NEWENUM.
                                 hasNewEnumMember = true;
-                                break;
                             }
                         }
+                    }
+
+                    // Check to see if the ForceIEnumerable custom value exists on the type
+                    if (HasForceIEnumerableCustomAttribute(typeInfo))
+                        hasNewEnumMember = true;
+
+                    if (hasDuplicateNewEnumMember)
+                    {
+                        info.ReportEvent(
+                            WarningCode.Wrn_MultiNewEnum,
+                            Resource.FormatString("Wrn_MultiNewEnum", fullName, typeInfo.GetDocumentation(firstNewEnum)));
                     }
                 }
                 else
@@ -1181,7 +1188,7 @@ namespace tlbimp2
                     //
                     info.ReportEvent(
                         WarningCode.Wrn_NonIntegralCustomAttributeType,
-                        Resource.FormatString("Wrn_NonIntegralCustomAttributeType", data.ToString(), typeInfo.GetDocumentation(dispid)));
+                        Resource.FormatString("Wrn_NonIntegralCustomAttributeType", "{" + CustomAttributeGuids.GUID_DispIdOverride.ToString().ToUpper() + "}", typeInfo.GetDocumentation(dispid)));
                 }
             }
 
@@ -1392,8 +1399,8 @@ namespace tlbimp2
             if (isConversionLoss)
             {
                 string msg = Resource.FormatString(
-                    "Wrn_UnconvertableArgs",
-                    info.TypeBuilder.Name,
+                    "Wrn_UnconvertableArgs", 
+                    info.TypeBuilder.FullName,
                     method.Name);
 
                 info.ConverterInfo.ReportEvent(WarningCode.Wrn_UnconvertableArgs, msg);
@@ -1727,7 +1734,7 @@ namespace tlbimp2
             {
                 CreateMethodForInterface(info, memberInfo);
             }
-
+            
             //
             // Generate the properties
             //
@@ -1740,6 +1747,30 @@ namespace tlbimp2
         /// </summary>
         /// <param name="info"></param>
         static public void CreateInterfaceCommon(InterfaceInfo info)
+        {
+            CreateInterfaceCommonInternal(info, false);
+        }
+
+        /// <summary>
+        /// Create methods for a event interface
+        /// </summary>
+        /// <param name="eventInterfaceInfo">
+        /// InterfaceInfo for the source interface, including the type builder for the event interface. 
+        /// Note that you can pass whatever type builder you want.
+        /// </param>
+        public static void CreateEventInterfaceCommon(InterfaceInfo eventInterfaceInfo)
+        {
+            CreateInterfaceCommonInternal(eventInterfaceInfo, true);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="info">The interfaceInfo</param>
+        /// <param name="isCreateEventInterface">
+        /// True if we are creating event interface, false if creating a normal interface
+        /// </param>
+        static public void CreateInterfaceCommonInternal(InterfaceInfo info, bool isCreateEventInterface)
         {
             bool bIsIDispatchBasedOnInterface = false;
 
@@ -1760,7 +1791,10 @@ namespace tlbimp2
                         // Either eliminate the type stack stuff or put PropertyInfo stuff elsewhere
                         // We cannot keep properties on the same interface info as it will cause problems
                         info.PushType(typeReferencedType, attrReferencedType);
-                        CreateMethods(info);
+                        if (isCreateEventInterface)
+                            CreateEventMethods(info);
+                        else
+                            CreateMethods(info);
                         info.PopType();
                         bIsIDispatchBasedOnInterface = true;
                     }
@@ -1769,19 +1803,74 @@ namespace tlbimp2
 
             if (!bIsIDispatchBasedOnInterface)
             {
-                CreateMethods(info);
+                if (isCreateEventInterface)
+                    CreateEventMethods(info);
+                else
+                    CreateMethods(info);
             }
         }
 
         /// <summary>
-        /// Create methods for a event interface
+        /// Create methods on event interface recursively
         /// </summary>
-        /// <param name="eventInterfaceInfo">
-        /// InterfaceInfo for the source interface, including the type builder for the event interface. 
-        /// Note that you can pass whatever type builder you want.
-        /// </param>
-        public static void CreateEventInterfaceCommon(InterfaceInfo eventInterfaceInfo)
+        /// <param name="eventInterfaceInfo">InterfaceInfo of the event interface</param>
+        public static void CreateEventMethods(InterfaceInfo eventInterfaceInfo)
         {
+            IConvInterface convInterface = (IConvInterface)eventInterfaceInfo.ConverterInfo.GetInterface(eventInterfaceInfo.RefTypeInfo, eventInterfaceInfo.RefTypeAttr);
+            if (convInterface.EventInterface == null)
+            {
+                convInterface.DefineEventInterface();
+            }
+
+            //
+            // If we are creating the co-class, create the real event interface first in case it doesn't exist yet
+            // Note that as event interface doesn't have inheritance, we'll have to do it outside of CreateEventMethodsInternal
+            //
+            if (eventInterfaceInfo.IsCoClass)
+                convInterface.EventInterface.Create();
+
+            // Then create the methods
+            CreateEventMethodsInternal(convInterface.EventInterface, eventInterfaceInfo);
+        }
+
+        public static void CreateEventMethodsInternal(IConvEventInterface convEventInterface, InterfaceInfo eventInterfaceInfo)
+        {
+            //
+            // Stop if info is already IUnknown. Doesn't stop for IDispatch because we want to convert the members of IDispatch
+            //
+            if (WellKnownGuids.IID_IUnknown == eventInterfaceInfo.RefTypeAttr.Guid)
+                return;
+
+            //
+            // Create methods for parent interface. We need to duplicate them.
+            //
+            if (eventInterfaceInfo.RefTypeAttr.cImplTypes == 1)
+            {
+                TypeInfo parent = eventInterfaceInfo.RefTypeInfo.GetRefType(0);
+                using (TypeAttr parentAttr = parent.GetTypeAttr())
+                {
+                    if (WellKnownGuids.IID_IUnknown != parentAttr.Guid && WellKnownGuids.IID_IDispatch != parentAttr.Guid)
+                    {
+                        InterfaceInfo parentInterfaceInfo = new InterfaceInfo(eventInterfaceInfo.ConverterInfo, eventInterfaceInfo.TypeBuilder, eventInterfaceInfo.EmitDispId, parent, parentAttr, eventInterfaceInfo.IsCoClass, eventInterfaceInfo.IsSource, eventInterfaceInfo.CurrentImplementingInterface);
+                        parentInterfaceInfo.IsDefaultInterface = eventInterfaceInfo.IsDefaultInterface;
+                        parentInterfaceInfo.CurrentSlot = eventInterfaceInfo.CurrentSlot;
+                        ConvCommon.CreateEventMethodsInternal(convEventInterface, parentInterfaceInfo);
+                        eventInterfaceInfo.CurrentSlot = parentInterfaceInfo.CurrentSlot;
+
+                        /*
+                        info.PushType(parent, parentAttr);
+                        CreateMethods(info);
+                        info.PopType();
+                         */
+                    }
+                    else
+                    {
+                        // Initialize v-table slot for IUnknown/IDispatch
+                        eventInterfaceInfo.CurrentSlot = parentAttr.cbSizeVft / parentAttr.cbSizeInstance;
+                    }
+                }
+            }
+
             ConverterInfo converterInfo = eventInterfaceInfo.ConverterInfo;
             TypeInfo type = eventInterfaceInfo.RefTypeInfo;
 
@@ -1791,13 +1880,6 @@ namespace tlbimp2
 
             // If we are creating the co-class, create the real event interface first in case it doesn't exist yet
             IConvInterface convInterface = (IConvInterface)converterInfo.GetInterface(type, attr);
-            if (convInterface.EventInterface == null)
-            {
-                convInterface.DefineEventInterface();
-            }
-
-            if (eventInterfaceInfo.IsCoClass)
-                convInterface.EventInterface.Create();
 
             // For every method in the source interface
             foreach (InterfaceMemberInfo memInfo in convInterface.AllMembers)
@@ -1805,10 +1887,10 @@ namespace tlbimp2
                 if (memInfo.IsProperty) continue;
 
                 FuncDesc func = memInfo.RefFuncDesc;
-
+                
                 // Get/Create the event delegate. 
-                Type delegateType = convInterface.EventInterface.GetEventDelegate(memInfo.Index);
-
+                Type delegateType = convEventInterface.GetEventDelegate(memInfo);
+                
                 // Need to use the same name as the source interface, otherwise TCEAdapterGenerator will fail
                 string eventName = memInfo.UniqueName;
 
@@ -1843,8 +1925,12 @@ namespace tlbimp2
                 // Do a member override for add_<Event> method if we are creating the method for coclass
                 if (eventInterfaceInfo.IsCoClass)
                 {
+                    Debug.Assert(eventInterfaceInfo.CurrentImplementingInterface != null);
+
+                    Type implementingInterfaceType = convEventInterface.RealManagedType;
+
                     // It is not possible to have a name conflict in event interface, so always use "add_XXX"
-                    MethodInfo methodInfo = convInterface.EventInterface.ManagedType.GetMethod("add_" + eventName, paramTypes);
+                    MethodInfo methodInfo = implementingInterfaceType.GetMethod("add_" + eventName, paramTypes);
                     eventInterfaceInfo.TypeBuilder.DefineMethodOverride(addMethodBuilder, methodInfo);
                 }
 
@@ -1866,8 +1952,12 @@ namespace tlbimp2
                 // Do a member override for remove_<Event> method if we are creating the method for coclass
                 if (eventInterfaceInfo.IsCoClass)
                 {
+                    Debug.Assert(eventInterfaceInfo.CurrentImplementingInterface != null);
+
+                    Type implementingInterfaceType = convEventInterface.RealManagedType;
+
                     // It is not possible to have a name conflict in event interface, so always use "remove_XXX"
-                    MethodInfo methodInfo = convInterface.EventInterface.ManagedType.GetMethod("remove_" + eventName, paramTypes);
+                    MethodInfo methodInfo = implementingInterfaceType.GetMethod("remove_" + eventName, paramTypes);
                     eventInterfaceType.DefineMethodOverride(removeMethodBuilder, methodInfo);
                 }
 
@@ -1942,6 +2032,25 @@ namespace tlbimp2
             return attr.IsDual || attr.typekind == TypeLibTypes.Interop.TYPEKIND.TKIND_DISPATCH;
         }
 
+        public static int GetPointerSize(TypeInfo typeInfo)
+        {
+            using (TypeAttr attr = typeInfo.GetTypeAttr())
+            {
+                if (attr.Guid == WellKnownGuids.IID_IUnknown || attr.Guid == WellKnownGuids.IID_IDispatch)
+                {
+                    return attr.cbSizeInstance;
+                }
+
+                if (attr.cImplTypes == 1)
+                {
+                    TypeInfo parent = typeInfo.GetRefType(0);
+                    return GetPointerSize(parent);
+                }
+
+                return attr.cbSizeInstance;
+            }
+        }
+
         /// <summary>
         /// Create the constant fields on the TypeBuilder according to the VarDesc in the type
         /// </summary>
@@ -1963,7 +2072,7 @@ namespace tlbimp2
                             typeConverter = new TypeConverter(typeof(float));
 
                         Type fieldType = typeConverter.ConvertedType;
-
+                        
                         if (typeConverter.IsConversionLoss)
                         {
                             //
@@ -1971,7 +2080,7 @@ namespace tlbimp2
                             //
                             info.ReportEvent(
                                 WarningCode.Wrn_UnconvertableField,
-                                Resource.FormatString("Wrn_UnconvertableField", type.GetDocumentation(), fieldName));
+                                Resource.FormatString("Wrn_UnconvertableField", typeBuilder.FullName, fieldName));
                         }
 
 
@@ -2096,6 +2205,34 @@ namespace tlbimp2
             }
 
             return defaultInterface;
+        }
+
+        /// <summary>
+        /// Check whether the interface, which the type "extendedType" wants to implement, is a class interface
+        /// exported by TlbExp.
+        /// We do not support this scenario, and an exception will be thrown.
+        /// </summary>
+        internal static void ThrowIfImplementingExportedClassInterface(
+            TypeInfo extendedType, IConvInterface parentInterface)
+        {
+            TypeInfo parentType = parentInterface.RefTypeInfo;
+            TypeLib parentTypeLib = parentType.GetContainingTypeLib();
+            TypeLib thisTypeLib = extendedType.GetContainingTypeLib();
+
+            string asmName = parentTypeLib.GetCustData(CustomAttributeGuids.GUID_ExportedFromComPlus) as string;
+            if (asmName != null)
+            {
+                string parentName = parentType.GetCustData(CustomAttributeGuids.GUID_ManagedName) as string;
+                Type parentManagedType = parentInterface.RealManagedType;
+                if (parentName != null && parentManagedType != null &&
+                    parentManagedType.IsClass)
+                {
+                    string msg = Resource.FormatString("Err_ImplementExportedClassInterface",
+                        new object[] { extendedType.GetDocumentation(), thisTypeLib.GetDocumentation(),
+                                parentType.GetDocumentation(), parentTypeLib.GetDocumentation() });
+                    throw new TlbImpGeneralException(msg, ErrorCode.Err_ImplementExportedClassInterface);
+                }
+            }
         }
     }
 }

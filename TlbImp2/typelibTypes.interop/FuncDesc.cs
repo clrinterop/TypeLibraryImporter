@@ -22,6 +22,11 @@ namespace TypeLibTypes.Interop
         {
             return new IntPtr(p.ToInt64() + offset);
         }
+
+        public static IntPtr MovePointer(IntPtr p, IntPtr offset)
+        {
+            return new IntPtr(p.ToInt64() + offset.ToInt64());
+        }
     }
 
     public class ParamDesc
@@ -129,7 +134,7 @@ namespace TypeLibTypes.Interop
 
                 ushort cDims = (ushort)Marshal.ReadInt16(Utils.MovePointer(pArrayDesc, Marshal.SizeOf(typeof(TYPEDESC))));
 
-                pArrayDesc = Utils.MovePointer(pArrayDesc, Marshal.SizeOf(typeof(ARRAYDESC)));
+                pArrayDesc = Utils.MovePointer(pArrayDesc, Marshal.OffsetOf(typeof(ARRAYDESC), "firstBound"));
 
                 List<SAFEARRAYBOUND> bounds = new List<SAFEARRAYBOUND>();
                 int safeArrayBoundSize = Marshal.SizeOf(typeof(SAFEARRAYBOUND));

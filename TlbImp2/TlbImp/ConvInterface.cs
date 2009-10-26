@@ -18,7 +18,6 @@ using System.Runtime.CompilerServices;
 using System.Diagnostics;
 using TypeLibTypes.Interop;
 using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.ComTypes;
 
 namespace tlbimp2
 {
@@ -107,7 +106,7 @@ namespace tlbimp2
             //
             // Support for Guid_DispIdOverrid
             //
-            m_dispIdIsOverriden = ConvCommon.GetOverrideDispId(info, typeInfo, index, m_memberType, ref m_dispId, false);
+            m_dispIdIsOverriden = ConvCommon.GetOverrideDispId(info, typeInfo, index, m_memberType, ref m_dispId, true);
         }
 
         /// <summary>
@@ -987,9 +986,11 @@ namespace tlbimp2
                             IConvBase convBase = m_info.GetTypeRef(ConvType.Interface, parent);
                             m_parentInterface = convBase as IConvInterface;
                             Debug.Assert(m_parentInterface != null);
+
+                            ConvCommon.ThrowIfImplementingExportedClassInterface(RefTypeInfo, m_parentInterface);
+
                             m_parentInterfaceTypeInfo = parent;
                             typeParent = m_parentInterface.RealManagedType;
-
                             implTypeList.Add(typeParent);
                         }
                     }
@@ -997,7 +998,7 @@ namespace tlbimp2
 
                 // If this interface has a NewEnum member but doesn't derive from IEnumerable directly, 
                 // then have it implement IEnumerable.
-                if (!m_implementsIEnumerable && ConvCommon.HasNewEnumMember(m_info, typeInfo))
+                if (!m_implementsIEnumerable && ConvCommon.HasNewEnumMember(m_info, typeInfo, interfacename))
                     implTypeList.Add(typeof(System.Collections.IEnumerable));
 
                 m_typeBuilder = m_info.ModuleBuilder.DefineType(

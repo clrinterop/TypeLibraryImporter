@@ -85,7 +85,7 @@ namespace tlbimp2
                 //
                 m_info.ReportEvent(
                     WarningCode.Wrn_UnconvertableField,
-                    Resource.FormatString("Wrn_UnconvertableField", type.GetDocumentation(), fieldName));
+                    Resource.FormatString("Wrn_UnconvertableField", m_typeBuilder.FullName, fieldName));
             }
 
             //

@@ -120,10 +120,6 @@ namespace tlbimp2
                     if (paramDesc.IsLCID || paramDesc.IsRetval)
                         continue;
 
-                    // Skip [vararg]
-                    if (i == varArg)
-                        continue;
-
                     // Skip the "new value" parameter for putters
                     if (skipLastRetVal)
                     {
@@ -131,7 +127,13 @@ namespace tlbimp2
                         continue;
                     }
 
-                    TypeConverter paramTypeConverter = new TypeConverter(info.ConverterInfo, info.RefTypeInfo, elemDesc.tdesc, ConversionType.Parameter);
+                    ConversionType conversionType;
+                    if (i == varArg)
+                        conversionType = ConversionType.VarArgParameter;
+                    else
+                        conversionType = ConversionType.Parameter;
+
+                    TypeConverter paramTypeConverter = new TypeConverter(info.ConverterInfo, info.RefTypeInfo, elemDesc.tdesc, conversionType);
                     info.IsConversionLoss |= paramTypeConverter.IsConversionLoss;
                     paramTypeList.Add(paramTypeConverter.ConvertedType);
                 }
