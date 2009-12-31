@@ -814,6 +814,19 @@ namespace tlbimp2
             }
 
             //
+            // If the type is already a byref type, remove the byref and add extra indirection(s).
+            // This is necessary to avoid trying to call MakeByRef on the byref type
+            //
+            if (result.IsByRef)
+            {
+                result = result.GetElementType();
+                if (result.IsValueType)
+                    m_nativeIndirections++;     // Value& = Value *
+                else
+                    m_nativeIndirections += 2;  // RefType& = RefType**
+            }
+
+            //
             // Process indirection
             //
             if (m_nativeIndirections > 0)
