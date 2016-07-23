@@ -1777,19 +1777,21 @@
 {
 .method  (PrivateScope, Public, RTSpecialName, SpecialName) .ctor (System.Object)
 {
-.maxstack 4
+.maxstack 6
 .locals int ()
 IL_0000:ldarg 0
 IL_0004:call instance [mscorlib]System.Object::.ctor ()
 IL_0009:ldarg 0
 IL_000d:ldarg 1
 IL_0011:castclass System.Runtime.InteropServices.ComTypes.IConnectionPointContainer
-IL_001b:ret 
-IL_XXXX:stfld System.Runtime.InteropServices.ComTypes.IConnectionPointContainer m_ConnectionPointContainer
+IL_0016:ldc.i4.0 
+IL_0017:newobj instance [mscorlib]System.WeakReference::.ctor (System.Object, System.Boolean)
+IL_0021:ret 
+IL_XXXX:stfld System.WeakReference m_wkConnectionPointContainer
 } // end of method .ctor
 .field (Private) [mscorlib]System.Collections.ArrayList m_aEventSinkHelpers
 .field (Private) [mscorlib]System.Runtime.InteropServices.ComTypes.IConnectionPoint m_ConnectionPoint
-.field (Private) [mscorlib]System.Runtime.InteropServices.ComTypes.IConnectionPointContainer m_ConnectionPointContainer
+.field (Private) [mscorlib]System.WeakReference m_wkConnectionPointContainer
 .method  (PrivateScope, Public, Virtual) System.Void add_Click (MSO9.DLL.tlb._CommandBarButtonEvents_ClickEventHandler)
 .override MSO9.DLL.tlb._CommandBarButtonEvents_EventProvider.add_Click{
 .maxstack 6
@@ -1983,16 +1985,18 @@ IL_00cd:ldloca.s 1
 IL_00cf:ldloc.2 
 IL_00d0:call instance [mscorlib]System.Guid::.ctor ([mscorlib]System.Byte[])
 IL_00d5:ldarg 0
-IL_00d9:ldfld System.Runtime.InteropServices.ComTypes.IConnectionPointContainer m_ConnectionPointContainer
-IL_00de:ldloca.s 1
-IL_00e0:ldloca.s 0
-IL_00e2:callvirt instance [mscorlib]System.Void [mscorlib]System.Runtime.InteropServices.ComTypes.IConnectionPointContainer::FindConnectionPoint ([mscorlib]System.Guid&, [mscorlib]System.Runtime.InteropServices.ComTypes.IConnectionPoint&)
-IL_00e7:ldarg 0
-IL_00eb:ldloc.0 
-IL_00ec:castclass System.Runtime.InteropServices.ComTypes.IConnectionPoint
-IL_00f6:ldarg 0
-IL_00fa:newobj instance [mscorlib]System.Collections.ArrayList::.ctor ()
-IL_0104:ret 
+IL_00d9:ldfld System.WeakReference m_wkConnectionPointContainer
+IL_00de:callvirt instance System.Object [mscorlib]System.WeakReference::get_Target ()
+IL_00e3:castclass System.Runtime.InteropServices.ComTypes.IConnectionPointContainer
+IL_00e8:ldloca.s 1
+IL_00ea:ldloca.s 0
+IL_00ec:callvirt instance [mscorlib]System.Void [mscorlib]System.Runtime.InteropServices.ComTypes.IConnectionPointContainer::FindConnectionPoint ([mscorlib]System.Guid&, [mscorlib]System.Runtime.InteropServices.ComTypes.IConnectionPoint&)
+IL_00f1:ldarg 0
+IL_00f5:ldloc.0 
+IL_00f6:castclass System.Runtime.InteropServices.ComTypes.IConnectionPoint
+IL_0100:ldarg 0
+IL_0104:newobj instance [mscorlib]System.Collections.ArrayList::.ctor ()
+IL_010e:ret 
 IL_XXXX:stfld System.Collections.ArrayList m_aEventSinkHelpers
 IL_XXXX:stfld System.Runtime.InteropServices.ComTypes.IConnectionPoint m_ConnectionPoint
 } // end of method Init
@@ -3086,19 +3090,21 @@ IL_0025:ret
 {
 .method  (PrivateScope, Public, RTSpecialName, SpecialName) .ctor (System.Object)
 {
-.maxstack 4
+.maxstack 6
 .locals int ()
 IL_0000:ldarg 0
 IL_0004:call instance [mscorlib]System.Object::.ctor ()
 IL_0009:ldarg 0
 IL_000d:ldarg 1
 IL_0011:castclass System.Runtime.InteropServices.ComTypes.IConnectionPointContainer
-IL_001b:ret 
-IL_XXXX:stfld System.Runtime.InteropServices.ComTypes.IConnectionPointContainer m_ConnectionPointContainer
+IL_0016:ldc.i4.0 
+IL_0017:newobj instance [mscorlib]System.WeakReference::.ctor (System.Object, System.Boolean)
+IL_0021:ret 
+IL_XXXX:stfld System.WeakReference m_wkConnectionPointContainer
 } // end of method .ctor
 .field (Private) [mscorlib]System.Collections.ArrayList m_aEventSinkHelpers
 .field (Private) [mscorlib]System.Runtime.InteropServices.ComTypes.IConnectionPoint m_ConnectionPoint
-.field (Private) [mscorlib]System.Runtime.InteropServices.ComTypes.IConnectionPointContainer m_ConnectionPointContainer
+.field (Private) [mscorlib]System.WeakReference m_wkConnectionPointContainer
 .method  (PrivateScope, Public, Virtual) System.Void add_Change (MSO9.DLL.tlb._CommandBarComboBoxEvents_ChangeEventHandler)
 .override MSO9.DLL.tlb._CommandBarComboBoxEvents_EventProvider.add_Change{
 .maxstack 6
@@ -3292,16 +3298,18 @@ IL_00cd:ldloca.s 1
 IL_00cf:ldloc.2 
 IL_00d0:call instance [mscorlib]System.Guid::.ctor ([mscorlib]System.Byte[])
 IL_00d5:ldarg 0
-IL_00d9:ldfld System.Runtime.InteropServices.ComTypes.IConnectionPointContainer m_ConnectionPointContainer
-IL_00de:ldloca.s 1
-IL_00e0:ldloca.s 0
-IL_00e2:callvirt instance [mscorlib]System.Void [mscorlib]System.Runtime.InteropServices.ComTypes.IConnectionPointContainer::FindConnectionPoint ([mscorlib]System.Guid&, [mscorlib]System.Runtime.InteropServices.ComTypes.IConnectionPoint&)
-IL_00e7:ldarg 0
-IL_00eb:ldloc.0 
-IL_00ec:castclass System.Runtime.InteropServices.ComTypes.IConnectionPoint
-IL_00f6:ldarg 0
-IL_00fa:newobj instance [mscorlib]System.Collections.ArrayList::.ctor ()
-IL_0104:ret 
+IL_00d9:ldfld System.WeakReference m_wkConnectionPointContainer
+IL_00de:callvirt instance System.Object [mscorlib]System.WeakReference::get_Target ()
+IL_00e3:castclass System.Runtime.InteropServices.ComTypes.IConnectionPointContainer
+IL_00e8:ldloca.s 1
+IL_00ea:ldloca.s 0
+IL_00ec:callvirt instance [mscorlib]System.Void [mscorlib]System.Runtime.InteropServices.ComTypes.IConnectionPointContainer::FindConnectionPoint ([mscorlib]System.Guid&, [mscorlib]System.Runtime.InteropServices.ComTypes.IConnectionPoint&)
+IL_00f1:ldarg 0
+IL_00f5:ldloc.0 
+IL_00f6:castclass System.Runtime.InteropServices.ComTypes.IConnectionPoint
+IL_0100:ldarg 0
+IL_0104:newobj instance [mscorlib]System.Collections.ArrayList::.ctor ()
+IL_010e:ret 
 IL_XXXX:stfld System.Collections.ArrayList m_aEventSinkHelpers
 IL_XXXX:stfld System.Runtime.InteropServices.ComTypes.IConnectionPoint m_ConnectionPoint
 } // end of method Init
@@ -3774,19 +3782,21 @@ IL_0021:ret
 {
 .method  (PrivateScope, Public, RTSpecialName, SpecialName) .ctor (System.Object)
 {
-.maxstack 4
+.maxstack 6
 .locals int ()
 IL_0000:ldarg 0
 IL_0004:call instance [mscorlib]System.Object::.ctor ()
 IL_0009:ldarg 0
 IL_000d:ldarg 1
 IL_0011:castclass System.Runtime.InteropServices.ComTypes.IConnectionPointContainer
-IL_001b:ret 
-IL_XXXX:stfld System.Runtime.InteropServices.ComTypes.IConnectionPointContainer m_ConnectionPointContainer
+IL_0016:ldc.i4.0 
+IL_0017:newobj instance [mscorlib]System.WeakReference::.ctor (System.Object, System.Boolean)
+IL_0021:ret 
+IL_XXXX:stfld System.WeakReference m_wkConnectionPointContainer
 } // end of method .ctor
 .field (Private) [mscorlib]System.Collections.ArrayList m_aEventSinkHelpers
 .field (Private) [mscorlib]System.Runtime.InteropServices.ComTypes.IConnectionPoint m_ConnectionPoint
-.field (Private) [mscorlib]System.Runtime.InteropServices.ComTypes.IConnectionPointContainer m_ConnectionPointContainer
+.field (Private) [mscorlib]System.WeakReference m_wkConnectionPointContainer
 .method  (PrivateScope, Public, Virtual) System.Void add_OnUpdate (MSO9.DLL.tlb._CommandBarsEvents_OnUpdateEventHandler)
 .override MSO9.DLL.tlb._CommandBarsEvents_EventProvider.add_OnUpdate{
 .maxstack 6
@@ -3980,16 +3990,18 @@ IL_00cd:ldloca.s 1
 IL_00cf:ldloc.2 
 IL_00d0:call instance [mscorlib]System.Guid::.ctor ([mscorlib]System.Byte[])
 IL_00d5:ldarg 0
-IL_00d9:ldfld System.Runtime.InteropServices.ComTypes.IConnectionPointContainer m_ConnectionPointContainer
-IL_00de:ldloca.s 1
-IL_00e0:ldloca.s 0
-IL_00e2:callvirt instance [mscorlib]System.Void [mscorlib]System.Runtime.InteropServices.ComTypes.IConnectionPointContainer::FindConnectionPoint ([mscorlib]System.Guid&, [mscorlib]System.Runtime.InteropServices.ComTypes.IConnectionPoint&)
-IL_00e7:ldarg 0
-IL_00eb:ldloc.0 
-IL_00ec:castclass System.Runtime.InteropServices.ComTypes.IConnectionPoint
-IL_00f6:ldarg 0
-IL_00fa:newobj instance [mscorlib]System.Collections.ArrayList::.ctor ()
-IL_0104:ret 
+IL_00d9:ldfld System.WeakReference m_wkConnectionPointContainer
+IL_00de:callvirt instance System.Object [mscorlib]System.WeakReference::get_Target ()
+IL_00e3:castclass System.Runtime.InteropServices.ComTypes.IConnectionPointContainer
+IL_00e8:ldloca.s 1
+IL_00ea:ldloca.s 0
+IL_00ec:callvirt instance [mscorlib]System.Void [mscorlib]System.Runtime.InteropServices.ComTypes.IConnectionPointContainer::FindConnectionPoint ([mscorlib]System.Guid&, [mscorlib]System.Runtime.InteropServices.ComTypes.IConnectionPoint&)
+IL_00f1:ldarg 0
+IL_00f5:ldloc.0 
+IL_00f6:castclass System.Runtime.InteropServices.ComTypes.IConnectionPoint
+IL_0100:ldarg 0
+IL_0104:newobj instance [mscorlib]System.Collections.ArrayList::.ctor ()
+IL_010e:ret 
 IL_XXXX:stfld System.Collections.ArrayList m_aEventSinkHelpers
 IL_XXXX:stfld System.Runtime.InteropServices.ComTypes.IConnectionPoint m_ConnectionPoint
 } // end of method Init

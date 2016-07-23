@@ -91,7 +91,9 @@ namespace TlbImpRegressionTestTool
                     return Color.Orange;
                 case TestCaseStatus.Failed:
                     return Color.Red;
-                case TestCaseStatus.Succeed:
+                case TestCaseStatus.Baselined:
+                    return Color.Aqua;
+                 case TestCaseStatus.Succeed:
                     return Color.LightGreen;
                 default:
                     return Color.LightGray;
@@ -127,11 +129,13 @@ namespace TlbImpRegressionTestTool
         {
             if (m_testCaseSet != null)
             {
-                RunAllTestCases(m_testCaseSet, false);
+                RunAllTestCases(m_testCaseSet, onlyRunSelected:false, baseline:false);
             }
         }
 
-        private void RunAllTestCases(TestCaseSet testCaseSet, bool onlyRunSelected)
+        delegate void ExecuteTestCaseDelegate(TestCase tc, int index);
+
+        private void RunAllTestCases(TestCaseSet testCaseSet, bool onlyRunSelected, bool baseline) 
         {
             if (!CheckAllCommandFileExist())
                 return;
@@ -156,9 +160,8 @@ namespace TlbImpRegressionTestTool
                         if (!onlyRunSelected ||
                             dataGridViewTestCases.Rows[i].Cells[0].EditedFormattedValue.ToString() == "True")
                         {
-                            TestCaseRunner runner = new TestCaseRunner(testCaseList[i],
-                                m_settings, i+1);
-                            runner.Run();
+                            TestCaseRunner runner = new TestCaseRunner(testCaseList[i], m_settings, i + 1);
+                            runner.Run(baseline);
                         }
                     }
                 }
@@ -234,7 +237,7 @@ namespace TlbImpRegressionTestTool
 
         private void RunSelectedTestCases(TestCaseSet testCaseSet)
         {
-            RunAllTestCases(testCaseSet, true);
+            RunAllTestCases(testCaseSet, onlyRunSelected:true, baseline:false);
         }
 
         private void EnableRunMenuItem(bool enabled)
@@ -243,6 +246,7 @@ namespace TlbImpRegressionTestTool
             toolStripMenuItemRunAllTestCases.Enabled = enabled;
             toolStripMenuItemOpenTestCaseFile.Enabled = enabled;
             toolStripMenuItemRunAllTestCases.Enabled = enabled;
+            toolStripMenuItemBaselineSelectedTestcases.Enabled = enabled;
             toolStripMenuItemStop.Enabled = !enabled;
         }
 
@@ -293,11 +297,17 @@ namespace TlbImpRegressionTestTool
             }
             catch (Exception ex)
             {
+                MessageBox.Show(ex.Message);
             }
         }
 
         private void dataGridViewTestCases_DataError(object sender, DataGridViewDataErrorEventArgs e)
         {
+        }
+
+        private void toolStripMenuItemBaselineSelectedTestcases_Click(object sender, EventArgs e)
+        {
+            RunAllTestCases(m_testCaseSet, onlyRunSelected: true, baseline: true);
         }
     }
 }

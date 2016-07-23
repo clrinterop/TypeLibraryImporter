@@ -26,14 +26,15 @@ namespace TlbImpRegressionTestTool
             m_outputDirectory = file.DirectoryName;
         }
 
-        internal void Run()
+        internal void Run(bool baseline)
         {
             m_testCase.TestCaseStatus = TestCaseStatus.Running;
 
             string targetFileName = Path.GetFileName(m_testCase.TestedTarget);
-            
+
+            string outputFileName = m_id + targetFileName + ".dll.bsl"; 
             bool success = CreateResult(m_settings.TestedCommand, m_testCase.TestedTarget,
-                m_testCase.WorkingDirectory, m_testCase.Arguments, m_id + targetFileName + ".dll.bsl");
+                m_testCase.WorkingDirectory, m_testCase.Arguments, outputFileName);
 
             if (!success)
             {
@@ -41,14 +42,22 @@ namespace TlbImpRegressionTestTool
                 return;
             }
 
-            if (FileCompareIdentical(m_testCase.Baseline,
-                Path.Combine(m_outputDirectory, m_id + targetFileName + ".dll.bsl")))
+            string outputFilePathName = Path.Combine(m_outputDirectory, outputFileName);
+            if (FileCompareIdentical(m_testCase.Baseline, outputFilePathName))
             {
                 m_testCase.TestCaseStatus = TestCaseStatus.Succeed;
             }
             else
             {
-                m_testCase.TestCaseStatus = TestCaseStatus.Failed;
+                if (baseline)
+                {
+                    File.Copy(outputFilePathName, m_testCase.Baseline, overwrite:true);
+                    m_testCase.TestCaseStatus = TestCaseStatus.Baselined;
+                }
+                else
+                { 
+                    m_testCase.TestCaseStatus = TestCaseStatus.Failed;
+                }
             }
         }
 

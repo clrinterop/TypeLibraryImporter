@@ -9,6 +9,7 @@ namespace TlbImpRegressionTestTool
         Running,
         Error,
         Failed,
+        Baselined,
         Succeed,
     }
 
